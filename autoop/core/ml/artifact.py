@@ -1,12 +1,18 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 import base64
-from typing import Dict, Any, List
+from typing import Optional
 
 class Artifact(BaseModel):
-    _name : str
-    _asset_path : str
-    _version : str
-    _data : bytes
-    _metadata: Dict[str, Any] = None
-    _ttype : str
-    _tags : List[str] = None
+    asset_path: str
+    version: str
+    name: Optional[str] = None
+    data: Optional[bytes] = None
+    type: Optional[str] = None
+
+    @property
+    def id(self) -> str:
+        encoded_path = base64.b64encode(self.asset_path.encode()).decode()
+        return f"{encoded_path}:{self.version}"
+
+    class Config:
+        underscore_attrs_are_private = True
