@@ -9,19 +9,22 @@ class Dataset(Artifact):
 
     def __init__(self, *args, **kwargs):
         super().__init__(type="dataset", *args, **kwargs)
+        self.data = kwargs.get('data', None)
 
     @staticmethod
     def from_dataframe(data: pd.DataFrame, name: str, asset_path: str, version: str = "1.0.0"):
+        encoded_data = data.to_csv(index=False).encode()
         return Dataset(
             name=name,
             asset_path=asset_path,
-            data=data.to_csv(index=False).encode(),
+            data=encoded_data,
             version=version,
         )
         
     def read(self) -> pd.DataFrame:
-        bytes = super().read()
-        csv = bytes.decode()
+        if self.data is None:
+            raise ValueError("Data is not initialized.")
+        csv = self.data.decode()
         return pd.read_csv(io.StringIO(csv))
     
     def save(self, data: pd.DataFrame) -> None:

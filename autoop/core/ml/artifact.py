@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr, Field
 import base64
 from typing import Optional
 
 class Artifact(BaseModel, ABC):
-    _asset_path: str
-    _version: str
-    name: Optional[str] = None
-    data: Optional[bytes] = None
-    type: Optional[str] = None
+    _asset_path: str = PrivateAttr()
+    _version: str = PrivateAttr()
+    _name: str = PrivateAttr()
+    data: bytes = Field()
+    _type: str = PrivateAttr()
 
     @property
     def id(self) -> str:
@@ -21,9 +21,9 @@ class Artifact(BaseModel, ABC):
         return {
             "asset_path": self._asset_path,
             "version": self._version,
-            "name": self.name,
-            "type": self.type,
-            "has_data": self.data is not None
+            "name": self._name,
+            "type": self._type,
+            "has_data": self._data is not None
         }
 
     @abstractmethod
@@ -36,5 +36,3 @@ class Artifact(BaseModel, ABC):
         """Saves the provided data in the artifact."""
         pass
 
-    class Config:
-        underscore_attrs_are_private = True
