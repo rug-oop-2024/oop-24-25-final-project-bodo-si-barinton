@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 import numpy as np
+from pydantic import BaseModel, Field
 
 METRICS = [
     "mean_squared_error",
@@ -10,16 +11,26 @@ METRICS = [
 def get_metric(name: str):
     # Factory function to get a metric by name.
     # Return a metric instance given its str name.
-    raise NotImplementedError("To be implemented.")
+    pass
+    
 
-class Metric(...):
+class Metric(ABC):
     """Base class for all metrics.
     """
     # your code here
     # remember: metrics take ground truth and prediction as input and return a real number
+    name : str = Field()
 
-    def __call__(self):
-        raise NotImplementedError("To be implemented.")
+    @abstractmethod
+    def calculate(self, observations : np.ndarray, ground_truth : np.ndarray) -> float:
+        pass
+
+    def __call__(self, observations : np.ndarray, ground_truth : np.ndarray) -> float:
+        if len(observations) != len(ground_truth):
+            raise ValueError("Parameters not of equal lenght")
+        return self.calculate(observations, ground_truth)
+
+        
 
 # add here concrete implementations of the Metric class
     
