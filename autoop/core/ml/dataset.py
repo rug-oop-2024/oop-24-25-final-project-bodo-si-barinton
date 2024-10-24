@@ -6,7 +6,7 @@ import io
 class Dataset(Artifact):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(ttype="dataset", *args, **kwargs)
+        super().__init__(type="dataset", *args, **kwargs)
 
     @staticmethod
     def from_dataframe(data: pd.DataFrame, name: str, asset_path: str, version: str="1.0.0"):
