@@ -9,7 +9,7 @@ class Dataset(Artifact):
 
     def __init__(self, *args, **kwargs):
         super().__init__(type="dataset", *args, **kwargs)
-        self.data = kwargs.get('data', None)
+        self._data = kwargs.get('data', None)
 
     @staticmethod
     def from_dataframe(data: pd.DataFrame, name: str, asset_path: str, version: str = "1.0.0"):
@@ -22,13 +22,13 @@ class Dataset(Artifact):
         )
         
     def read(self) -> pd.DataFrame:
-        if self.data is None:
+        if self._data is None:
             raise ValueError("Data is not initialized.")
-        csv = self.data.decode()
+        csv = self._data.decode()
         return pd.read_csv(io.StringIO(csv))
     
     def save(self, data: pd.DataFrame) -> None:
-        self.data = data.to_csv(index=False).encode()
+        self._data = data.to_csv(index=False).encode()
 
     def split_data(self, test_size: float = 0.2, random_state: Optional[int] = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Splits the tabular data into training and testing sets.

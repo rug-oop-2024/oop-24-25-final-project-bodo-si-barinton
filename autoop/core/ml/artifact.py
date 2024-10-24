@@ -7,7 +7,7 @@ class Artifact(BaseModel, ABC):
     _asset_path: str = PrivateAttr()
     _version: str = PrivateAttr()
     _name: str = PrivateAttr()
-    data: bytes = Field()
+    _data: bytes = PrivateAttr()
     _type: str = PrivateAttr()
 
     @property
