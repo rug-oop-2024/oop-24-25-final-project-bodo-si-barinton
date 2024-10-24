@@ -9,39 +9,36 @@ from autoop.functional.feature import detect_feature_types
 class TestFeatures(unittest.TestCase):
 
     def setUp(self) -> None:
-        pass
+        self.iris_data = load_iris()
+        self.iris_df = pd.DataFrame(
+            self.iris_data.data,
+            columns=self.iris_data.feature_names,
+        )
+        self.adult_data = fetch_openml(name="adult", version=1, parser="auto")
+        self.adult_df = pd.DataFrame(
+            self.adult_data.data,
+            columns=self.adult_data.feature_names,
+        )
 
     def test_detect_features_continuous(self):
-        iris = load_iris()
-        df = pd.DataFrame(
-            iris.data,
-            columns=iris.feature_names,
-        )
         dataset = Dataset.from_dataframe(
             name="iris",
             asset_path="iris.csv",
-            data=df,
+            data=self.iris_df,
         )
-        self.X = iris.data
-        self.y = iris.target
         features = detect_feature_types(dataset)
         self.assertIsInstance(features, list)
         self.assertEqual(len(features), 4)
         for feature in features:
             self.assertIsInstance(feature, Feature)
-            self.assertEqual(feature.name in iris.feature_names, True)
-            self.assertEqual(feature.type, "numerical")
+            self.assertEqual(feature.name in self.iris_data.feature_names, True)
+            self.assertEqual(feature.feature_type, "numerical")
         
     def test_detect_features_with_categories(self):
-        data = fetch_openml(name="adult", version=1, parser="auto")
-        df = pd.DataFrame(
-            data.data,
-            columns=data.feature_names,
-        )
         dataset = Dataset.from_dataframe(
             name="adult",
             asset_path="adult.csv",
-            data=df,
+            data=self.adult_df,
         )
         features = detect_feature_types(dataset)
         self.assertIsInstance(features, list)
@@ -65,8 +62,12 @@ class TestFeatures(unittest.TestCase):
         ]
         for feature in features:
             self.assertIsInstance(feature, Feature)
-            self.assertEqual(feature.name in data.feature_names, True)
+            self.assertEqual(feature.name in self.adult_data.feature_names, True)
         for detected_feature in filter(lambda x: x.name in numerical_columns, features):
-            self.assertEqual(detected_feature.type, "numerical")
+            self.assertEqual(detected_feature.feature_type, "numerical")
         for detected_feature in filter(lambda x: x.name in categorical_columns, features):
-            self.assertEqual(detected_feature.type, "categorical")
+            self.assertEqual(detected_feature.feature_type, "categorical")
+
+if __name__ == "__main__":
+    unittest.main()
+
