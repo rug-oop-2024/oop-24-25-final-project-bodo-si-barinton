@@ -12,9 +12,11 @@ def get_metric(name: str):
     # Factory function to get a metric by name.
     # Return a metric instance given its str name.
     if name == "mean_squared_error":
-        MeanSquaredErrorMetric()
+        return MeanSquaredErrorMetric()
     elif name =="accuracy":
-        AccuracyMetric()
+        return AccuracyMetric()
+    else :
+        raise ValueError(f"Metric '{name}' is not implemented.")
     
 
     
@@ -48,4 +50,4 @@ class MeanSquaredErrorMetric(Metric):
         sq_diference = diference ** 2
         return np.mean(sq_diference)
         
-    
+        
