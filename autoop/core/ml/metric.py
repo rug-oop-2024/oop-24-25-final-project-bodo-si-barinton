@@ -10,7 +10,9 @@ METRICS = [
     "accuracy",
     "logloss",
     "micro",
-    "macro"
+    "macro",
+    "mean_absolute_error",
+    "root_mean_squared_error"
 ]
 
 def get_metric(name: str) -> 'Metric':
@@ -25,6 +27,10 @@ def get_metric(name: str) -> 'Metric':
         return MicroAverageMetric()
     elif name == "macro":
         return MacroAverageMetric()
+    elif name == "mean_absolute_error":
+        return MeanAbsoluteErrorMetric()
+    elif name == "root_mean_squared_error":
+        return RootMeanSquaredErrorMetric()
     else:
         raise ValueError(f"Metric '{name}' is not implemented.")
 
@@ -39,6 +45,9 @@ def count_metrics_per_class(observations: np.ndarray, ground_truth: np.ndarray, 
 def get_unique_classes(ground_truth: np.ndarray) -> np.ndarray:
     """Get unique classes from the ground truth labels."""
     return np.unique(ground_truth)
+
+def difference(observation : np.ndarray, ground_truth : np.ndarray) -> np.ndarray : 
+    return ground_truth - observation
 
 class Metric(ABC):
     """Base class for all metrics."""
@@ -65,6 +74,26 @@ class MeanSquaredErrorMetric(Metric):
         difference = observations - ground_truth
         sq_difference = difference ** 2
         return np.mean(sq_difference)
+    
+class MeanAbsoluteErrorMetric(Metric):
+    """_summary_
+    Metric for Mean Absolute Error
+    Args:
+        Metric (_type_): _description_
+    """
+    def calculate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
+        dif = difference(observations, ground_truth)
+        return np.mean(np.abs(dif))
+    
+class RootMeanSquaredErrorMetric(MeanSquaredErrorMetric):
+    """_summary_
+    Metric for RootM Mean Squared Error
+    Args:
+        MeanSquaredErrorMetric (_type_): _description_
+    """
+    def calculate(self, observations, ground_truth):
+        rmse = super().calculate(observations, ground_truth)
+        return np.sqrt(rmse)
 
 class LogLossMetric(Metric):
     """Metric for calculating Log Loss for multi-class classification."""
