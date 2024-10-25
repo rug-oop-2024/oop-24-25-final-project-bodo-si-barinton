@@ -1,4 +1,4 @@
-from autoop.core.ml.model import Model, PrivateAttr
+from autoop.core.ml.model.model import Model, PrivateAttr
 import numpy as np
 from sklearn.linear_model import LinearRegression as LS
 
