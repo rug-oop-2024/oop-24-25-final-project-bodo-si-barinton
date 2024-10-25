@@ -11,7 +11,12 @@ METRICS = [
 def get_metric(name: str):
     # Factory function to get a metric by name.
     # Return a metric instance given its str name.
-    pass
+    if name == "mean_squared_error":
+        MeanSquaredErrorMetric()
+    elif name =="accuracy":
+        AccuracyMetric()
+    
+
     
 
 class Metric(ABC):
@@ -19,18 +24,28 @@ class Metric(ABC):
     """
     # your code here
     # remember: metrics take ground truth and prediction as input and return a real number
-    name : str = Field()
-
     @abstractmethod
-    def calculate(self, observations : np.ndarray, ground_truth : np.ndarray) -> float:
+    def calculate(self, observations : np.ndarray, ground_truth : np.ndarray) -> int|float:
         pass
 
-    def __call__(self, observations : np.ndarray, ground_truth : np.ndarray) -> float:
+    def __call__(self, observations : np.ndarray, ground_truth : np.ndarray) -> int|float:
         if len(observations) != len(ground_truth):
             raise ValueError("Parameters not of equal lenght")
         return self.calculate(observations, ground_truth)
 
         
+class AccuracyMetric(Metric):
 
-# add here concrete implementations of the Metric class
+    def calculate(self, observations : np.ndarray, ground_truth : np.ndarray) -> int|float :
+        correct_predictions = (observations == ground_truth)
+        no_correct = np.sum(correct_predictions)
+        return no_correct / len(observations)
+
+class MeanSquaredErrorMetric(Metric):
+
+    def calculate(self, observations : np.ndarray, ground_truth : np.ndarray) -> int|float :
+        diference = observations - ground_truth
+        sq_diference = diference ** 2
+        return np.mean(sq_diference)
+        
     
