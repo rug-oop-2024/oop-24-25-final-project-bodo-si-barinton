@@ -52,25 +52,25 @@ def difference(observation : np.ndarray, ground_truth : np.ndarray) -> np.ndarra
 class Metric(ABC):
     """Base class for all metrics."""
     @abstractmethod
-    def calculate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
+    def evaluate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
         pass
 
     def __call__(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
         if len(observations) != len(ground_truth):
             raise ValueError("Parameters not of equal length")
-        return self.calculate(observations, ground_truth)
+        return self.evaluate(observations, ground_truth)
 
 class AccuracyMetric(Metric):
     """Metric for calculating accuracy."""
 
-    def calculate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
+    def evaluate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
         no_correct = np.sum(observations == ground_truth)
         return no_correct / len(observations)
 
 class MeanSquaredErrorMetric(Metric):
     """Metric for calculating Mean Squared Error (MSE)."""
 
-    def calculate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
+    def evaluate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
         difference = observations - ground_truth
         sq_difference = difference ** 2
         return np.mean(sq_difference)
@@ -81,7 +81,7 @@ class MeanAbsoluteErrorMetric(Metric):
     Args:
         Metric (_type_): _description_
     """
-    def calculate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
+    def evaluate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
         dif = difference(observations, ground_truth)
         return np.mean(np.abs(dif))
     
@@ -91,14 +91,14 @@ class RootMeanSquaredErrorMetric(MeanSquaredErrorMetric):
     Args:
         MeanSquaredErrorMetric (_type_): _description_
     """
-    def calculate(self, observations, ground_truth):
-        rmse = super().calculate(observations, ground_truth)
+    def evaluate(self, observations, ground_truth):
+        rmse = super().evaluate(observations, ground_truth)
         return np.sqrt(rmse)
 
 class LogLossMetric(Metric):
     """Metric for calculating Log Loss for multi-class classification."""
 
-    def calculate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
+    def evaluate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
         observations = np.clip(observations, 1e-15, 1 - 1e-15)
         log_loss_sum = 0.0
         classes = get_unique_classes(ground_truth)
@@ -114,7 +114,7 @@ class LogLossMetric(Metric):
 class MicroAverageMetric(Metric):
     """Metric for calculating Micro-Averaged Precision, Recall, and F1 Score."""
 
-    def calculate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
+    def evaluate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
         TP, FP, FN, _ = 0, 0, 0, 0
         classes = get_unique_classes(ground_truth)
 
@@ -133,7 +133,7 @@ class MicroAverageMetric(Metric):
 class MacroAverageMetric(Metric):
     """Metric for calculating Macro-Averaged Precision, Recall, and F1 Score."""
 
-    def calculate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
+    def evaluate(self, observations: np.ndarray, ground_truth: np.ndarray) -> int | float:
         classes = get_unique_classes(ground_truth)
         precision_per_class = []
         recall_per_class = []
