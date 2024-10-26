@@ -7,12 +7,12 @@ from autoop.core.ml.dataset import Dataset
 
 class Feature(BaseModel):
     name : str = Field(...)
-    feature_type: Literal["categorical", "numerical"] = Field(...)
+    type: Literal["categorical", "numerical"] = Field(...)
     _data: Optional[Any] = PrivateAttr(None)
 
     def set_data(self, data) -> None:
         """Sets the data for the feature, enforcing NumPy array for numerical features."""
-        if self.feature_type == "numerical":
+        if self.type == "numerical":
             self._data = np.array(data)
         else:
             self._data = data
