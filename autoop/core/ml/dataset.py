@@ -30,9 +30,3 @@ class Dataset(Artifact):
     def save(self, data: pd.DataFrame) -> None:
         self._data = data.to_csv(index=False).encode()
 
-    def split_data(self, test_size: float = 0.2, random_state: Optional[int] = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """Splits the tabular data into training and testing sets.
-        """
-        df = self.read()
-        train_df, test_df = train_test_split(df, test_size=test_size, random_state=random_state)
-        return train_df, test_df
