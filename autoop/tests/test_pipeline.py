@@ -7,7 +7,7 @@ from autoop.core.ml.dataset import Dataset
 from autoop.core.ml.feature import Feature
 from autoop.functional.feature import detect_feature_types
 from autoop.core.ml.model.regression import MultipleLinearRegression
-from autoop.core.ml.metric import MeanSquaredError
+from autoop.core.ml.metric import MeanSquaredErrorMetric
 
 class TestPipeline(unittest.TestCase):
 
@@ -28,7 +28,7 @@ class TestPipeline(unittest.TestCase):
             model=MultipleLinearRegression(),
             input_features=list(filter(lambda x: x.name != "age", self.features)),
             target_feature=Feature(name="age", type="numerical"),
-            metrics=[MeanSquaredError()],
+            metrics=[MeanSquaredErrorMetric()],
             split=0.8
         )
         self.ds_size = data.data.shape[0]
@@ -60,3 +60,6 @@ class TestPipeline(unittest.TestCase):
         self.assertIsNotNone(self.pipeline._predictions)
         self.assertIsNotNone(self.pipeline._metrics_results)
         self.assertEqual(len(self.pipeline._metrics_results), 1)
+
+if __name__ == "__main__":
+    unittest.main()
