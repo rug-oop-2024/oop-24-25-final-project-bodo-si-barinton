@@ -23,7 +23,7 @@ def detect_feature_types(dataset: Dataset) -> List[Feature]:
         else:
             feature_type = "categorical"
 
-        feature = Feature(name=column, feature_type=feature_type)
+        feature = Feature(name=column, type=feature_type)
         feature.set_data(df[column].values)
         features.append(feature)
     
