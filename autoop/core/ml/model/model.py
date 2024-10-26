@@ -28,5 +28,9 @@ class Model(Artifact):
     
     def save(self, data : bytes) -> None:
         self._data = data
+    class Config:
+        protected_namespaces = () 
+
+  
 
     
