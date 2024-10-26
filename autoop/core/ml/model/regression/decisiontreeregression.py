@@ -1,8 +1,7 @@
 from autoop.core.ml.model.model import Model, PrivateAttr
 import numpy as np
 from typing import Any, Optional
-import unittest
-from unittest.mock import patch, MagicMock
+
 
 class Node:
     def __init__(self):
