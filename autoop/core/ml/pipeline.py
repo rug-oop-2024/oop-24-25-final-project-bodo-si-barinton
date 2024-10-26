@@ -85,7 +85,6 @@ Pipeline(
         self._input_vectors = [data for (feature_name, data, artifact) in input_results]
 
     def _split_data(self):
-        # Split the data into training and testing sets
         split = self._split
         self._train_X = [vector[:int(split * len(vector))] for vector in self._input_vectors]
         self._test_X = [vector[int(split * len(vector)):] for vector in self._input_vectors]
@@ -114,10 +113,20 @@ Pipeline(
         self._preprocess_features()
         self._split_data()
         self._train()
+        X_train = self._compact_vectors(self._train_X)
+        Y_train = self._train_y
+        self._training_metrics_results = []
+        train_predictions = self._model.predict(X_train)
+    
+        for metric in self._metrics:
+            train_result = metric.evaluate(train_predictions, Y_train)
+            self._training_metrics_results.append((metric, train_result))
+        
         self._evaluate()
         return {
-            "metrics": self._metrics_results,
-            "predictions": self._predictions,
+            "training_metrics": self._training_metrics_results,
+        "evaluation_metrics": self._metrics_results,
+        "predictions": self._predictions
         }
         
 
