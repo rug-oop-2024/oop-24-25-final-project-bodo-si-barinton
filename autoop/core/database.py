@@ -96,4 +96,3 @@ class Database():
             if collection not in self._data:
                 self._data[collection] = {}
             self._data[collection][id] = json.loads(data.decode())
-
