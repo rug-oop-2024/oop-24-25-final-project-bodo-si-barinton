@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, PrivateAttr, Field
+from pydantic import BaseModel, PrivateAttr
 import base64
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 class Artifact(BaseModel, ABC):
     _asset_path: str = PrivateAttr()
@@ -9,6 +9,36 @@ class Artifact(BaseModel, ABC):
     _name: str = PrivateAttr()
     _data: bytes = PrivateAttr()
     _type: str = PrivateAttr()
+    _tags : List[str] = PrivateAttr()
+    _metadata : Dict [Any, Any ] = PrivateAttr()
+
+    @property
+    def asset_path(self) -> str:
+        return self._asset_path
+
+    @property
+    def version(self) -> str:
+        return self._version
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def data(self) -> bytes:
+        return self._data
+
+    @property
+    def type(self) -> str:
+        return self._type
+
+    @property
+    def tags(self) -> List[str]:
+        return self._tags
+    
+    @property
+    def metadata(self) -> Dict[Any, Any]:
+        return self._metadata
 
     @property
     def id(self) -> str:
@@ -23,7 +53,8 @@ class Artifact(BaseModel, ABC):
             "version": self._version,
             "name": self._name,
             "type": self._type,
-            "has_data": self._data is not None
+            "has_data": self._data is not None,
+            "tags" : self._tags
         }
 
     @abstractmethod
