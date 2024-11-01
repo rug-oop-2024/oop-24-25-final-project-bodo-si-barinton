@@ -5,7 +5,11 @@ from pydantic import PrivateAttr
 
 class LassoRegression(Model):
     _model: Lasso = PrivateAttr()
-    _is_trained: bool = PrivateAttr(default=False)
+
+    def __init__(self, **kwargs):
+        # Initialize the base class and set the model type to "classification"
+        super().__init__(model_type="regression", **kwargs)
+        self._model = Lasso()
 
 
     def fit(self, observations: np.ndarray, ground_truth: np.ndarray) -> None:
@@ -17,7 +21,7 @@ class LassoRegression(Model):
             ground_truth (np.ndarray): Target output labels.
         """
         self._model.fit(observations, ground_truth)
-        self._parameters = self._model.get_params()
+        self._parameters["coefficients"] = self._model.get_params()
         self._is_trained = True
 
     def predict(self, observations: np.ndarray) -> np.ndarray:
