@@ -10,6 +10,7 @@ class Model(Artifact):
 
     _parameters: dict = PrivateAttr(default_factory=dict)
     model_type : Literal["classification" , "regression"]
+    _is_trained: bool = PrivateAttr(default= False)
 
     @property
     def parameters(self):
