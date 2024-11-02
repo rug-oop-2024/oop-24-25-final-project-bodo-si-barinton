@@ -16,4 +16,7 @@ class Feature(BaseModel):
             self._data = np.array(data)
         else:
             self._data = data
+    
+    def __str__(self) -> str:
+        return f"Feature(name={self.name}, type={self.type}, data={self._data})"
 
