@@ -1,100 +1,126 @@
-import streamlit as st
-import pandas as pd
 import os
+import csv
+from io import StringIO
+import streamlit as st
+import json
+import pandas as pd
+from autoop.core.database import Database
+from autoop.core.storage import LocalStorage
 
-from app.core.system import AutoMLSystem
-from autoop.core.ml.dataset import Dataset
+# Initialize the storage and database
+assets_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../assets"))
 
 
-# Get the AutoML system instance
-automl = AutoMLSystem.get_instance()
+storage = LocalStorage(base_path=assets_path)
+database = Database(storage=storage)
 
-# List datasets from the registry
-datasets = automl.registry.list(type="dataset")
+st.title("Dataset Manager")
 
-# Title of the page
-st.title("Dataset Management")
+# Sidebar menu for actions
+action = st.sidebar.selectbox("Choose an action", ["Add Dataset", "View Dataset", "Delete Dataset", "List Datasets"])
 
-# Sidebar options
-st.sidebar.header("Actions")
-action = st.sidebar.selectbox("Select an action", ["View Datasets", "Add Dataset", "Edit Dataset", "Delete Dataset"])
+# Helper functions
+def csv_to_json(csv_file):
+    # Read the CSV file into a list of dictionaries
+    csv_reader = csv.DictReader(csv_file)
+    data = [row for row in csv_reader]
+    return data
 
-# Function to display datasets in a table
-def display_datasets(datasets):
-    data = {
-        "Name": [dataset.name for dataset in datasets],
-        "Version": [dataset.version for dataset in datasets],
-        "Path": [dataset.asset_path for dataset in datasets],
-    }
-    df = pd.DataFrame(data)
-    st.dataframe(df)
+def csv_to_json(csv_file):
+    # Read the CSV file into a list of dictionaries
+    csv_reader = csv.DictReader(csv_file)
+    data = [row for row in csv_reader]
+    return data
 
-# Display datasets
-if action == "View Datasets":
-    st.subheader("Available Datasets")
-    display_datasets(datasets)
-    
-    # Option to view details
-    selected_dataset_name = st.selectbox("Select Dataset to View Details", [d.name for d in datasets])
-    selected_dataset = next((d for d in datasets if d.name == selected_dataset_name), None)
-    
-    if selected_dataset:
-        st.write("### Dataset Details")
-        try:
-            data = selected_dataset.read()
-            st.dataframe(data)
-        except Exception as e:
-            st.error(f"Failed to load dataset: {e}")
-
-elif action == "Add Dataset":
+# Function to add a new dataset
+def add_dataset():
     st.subheader("Add a New Dataset")
-    name = st.text_input("Dataset Name")
-    version = st.text_input("Version", "1.0.0")
-    uploaded_file = st.file_uploader("Upload CSV", type="csv")
 
-    if uploaded_file:
-        file_name = os.path.basename(uploaded_file.name)
-        asset_path = st.text_input("Asset Path", value=f"/assets/{file_name}")
-        data = pd.read_csv(uploaded_file)
-        
-        st.write("Preview of Uploaded Data")
-        st.dataframe(data.head())
-        
-        if st.button("Add Dataset"):
-            encoded_data = data.to_csv(index=False).encode()
-            new_dataset = Dataset(name=name, asset_path=asset_path, data=encoded_data, version=version)
-            automl.registry.register(new_dataset)  # Use register instead of add
-            st.success(f"Dataset '{name}' added successfully!")
-    else:
-        asset_path = st.text_input("Asset Path", value="")
-
-elif action == "Edit Dataset":
-    st.subheader("Edit an Existing Dataset")
-    selected_dataset_name = st.selectbox("Select Dataset to Edit", [d.name for d in datasets])
+    collection = st.text_input("Collection Name")
+    dataset_id = st.text_input("Dataset ID")
     
-    selected_dataset = next((d for d in datasets if d.name == selected_dataset_name), None)
-    if selected_dataset:
-        st.write("### Edit Dataset Details")
-        new_version = st.text_input("New Version", value=selected_dataset.version)
-        
-        # Option to replace data
-        uploaded_file = st.file_uploader("Upload New CSV", type="csv")
-        if uploaded_file:
-            data = pd.read_csv(uploaded_file)
-            st.write("Preview of New Data")
-            st.dataframe(data.head())
-        
-        if st.button("Save Changes"):
-            if uploaded_file:
-                selected_dataset.save(data)  # Save new data
-            selected_dataset.version = new_version
-            automl.registry.update(selected_dataset)
-            st.success(f"Dataset '{selected_dataset_name}' updated successfully!")
+    # Manual entry
+    entry_data = st.text_area("Dataset JSON (in dictionary format)")
+    
+    # File upload
+    uploaded_file = st.file_uploader("Upload a dataset file", type=["json", "csv"])
 
+    # Process uploaded file, if available
+    file_data = None
+    if uploaded_file is not None:
+        if uploaded_file.type == "application/json":
+            try:
+                # Read JSON file
+                file_data = json.load(uploaded_file)
+                st.write("JSON data loaded successfully:", file_data)
+            except Exception as e:
+                st.error(f"Failed to read JSON file: {e}")
+        elif uploaded_file.type == "text/csv":
+            try:
+                # Convert CSV to JSON format
+                csv_file = StringIO(uploaded_file.getvalue().decode("utf-8"))
+                file_data = csv_to_json(csv_file)
+                st.write("CSV data converted to JSON format successfully:", file_data)
+            except Exception as e:
+                st.error(f"Failed to convert CSV file to JSON format: {e}")
+    
+    # Save dataset either from manual entry or file upload
+    if st.button("Save Dataset"):
+        try:
+            # Determine the final entry data
+            if file_data is not None:
+                entry = {"data": file_data} if isinstance(file_data, list) else file_data
+            else:
+                entry = eval(entry_data)  # Convert text to dictionary (use cautiously)
+
+            # Save data in the database
+            saved_entry = database.set(collection, dataset_id, entry)
+            st.success(f"Dataset saved successfully: {saved_entry}")
+        except Exception as e:
+            st.error(f"Failed to save dataset: {e}")
+
+def view_dataset():
+    st.subheader("View Dataset")
+
+    collection = st.text_input("Collection Name")
+    dataset_id = st.text_input("Dataset ID")
+
+    if st.button("Fetch Dataset"):
+        data = database.get(collection, dataset_id)
+        if data:
+            st.write(data)
+        else:
+            st.warning("Dataset not found.")
+
+def delete_dataset():
+    st.subheader("Delete Dataset")
+
+    collection = st.text_input("Collection Name")
+    dataset_id = st.text_input("Dataset ID")
+
+    if st.button("Delete Dataset"):
+        database.delete(collection, dataset_id)
+        st.success(f"Dataset with ID '{dataset_id}' from '{collection}' deleted.")
+
+def list_datasets():
+    st.subheader("List All Datasets in a Collection")
+
+    collection = st.text_input("Collection Name")
+
+    if st.button("List Datasets"):
+        datasets = database.list(collection)
+        if datasets:
+            for dataset_id, data in datasets:
+                st.write(f"ID: {dataset_id} - Data: {data}")
+        else:
+            st.warning("No datasets found in this collection.")
+
+# Show the selected action's corresponding UI
+if action == "Add Dataset":
+    add_dataset()
+elif action == "View Dataset":
+    view_dataset()
 elif action == "Delete Dataset":
-    st.subheader("Delete a Dataset")
-    selected_dataset_name = st.selectbox("Select Dataset to Delete", [d.name for d in datasets])
-    
-    if st.button("Delete"):
-        automl.registry.delete(selected_dataset_name)
-        st.success(f"Dataset '{selected_dataset_name}' deleted successfully!")
+    delete_dataset()
+elif action == "List Datasets":
+    list_datasets()
