@@ -60,10 +60,10 @@ class Artifact(BaseModel, ABC):
     @abstractmethod
     def read(self) -> Optional[bytes]:
         """Returns the stored data in bytes if available."""
-        pass
+        return self._data
 
     @abstractmethod
     def save(self, data: bytes) -> None:
         """Saves the provided data in the artifact."""
-        pass
+        self._data = data
 

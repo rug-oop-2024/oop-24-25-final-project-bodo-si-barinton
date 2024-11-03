@@ -2,8 +2,7 @@ from autoop.core.ml.artifact import Artifact
 from abc import ABC, abstractmethod
 import pandas as pd
 import io
-from sklearn.model_selection import train_test_split
-from typing import Optional, Tuple
+
 
 class Dataset(Artifact):
 
@@ -28,11 +27,11 @@ class Dataset(Artifact):
         )
         
     def read(self) -> pd.DataFrame:
-        if self._data is None:
-            raise ValueError("Data is not initialized.")
-        csv = self._data.decode()
+        bytes = super().read()
+        csv = bytes.decode()
         return pd.read_csv(io.StringIO(csv))
-    
-    def save(self, data: pd.DataFrame) -> None:
-        self._data = data.to_csv(index=False).encode()
+
+    def save(self, data: pd.DataFrame) -> bytes:
+        bytes = data.to_csv(index=False).encode()
+        return super().save(bytes)
 
