@@ -6,7 +6,8 @@ import json
 import pandas as pd
 from autoop.core.database import Database
 from autoop.core.storage import LocalStorage
-
+from autoop.core.ml.dataset import Dataset
+from app.core.system import AutoMLSystem
 # Initialize the storage and database
 assets_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../assets"))
 
@@ -17,14 +18,9 @@ database = Database(storage=storage)
 st.title("Dataset Manager")
 
 # Sidebar menu for actions
-action = st.sidebar.selectbox("Choose an action", ["Add Dataset", "View Dataset", "Delete Dataset", "List Datasets"])
+action = st.sidebar.selectbox("Choose an action", ["Add Dataset", "View Dataset", "Delete Dataset", "List Datasets", "Register Dataset"])
 
-# Helper functions
-def csv_to_json(csv_file):
-    # Read the CSV file into a list of dictionaries
-    csv_reader = csv.DictReader(csv_file)
-    data = [row for row in csv_reader]
-    return data
+
 
 def csv_to_json(csv_file):
     # Read the CSV file into a list of dictionaries
@@ -115,6 +111,33 @@ def list_datasets():
         else:
             st.warning("No datasets found in this collection.")
 
+def upload_and_register_dataset():
+    st.subheader("Upload and Register Dataset")
+
+    # Upload a CSV dataset
+    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+    if uploaded_file is not None:
+        # Read CSV into a DataFrame
+        df = pd.read_csv(uploaded_file)
+        st.write("Uploaded Data:", df)
+
+        dataset_name = st.text_input("Dataset Name")
+        asset_path = f"./assets/datasets/{dataset_name.lower().replace(' ', '_')}.csv"
+
+        if st.button("Register Dataset"):
+            try:
+                # Create a Dataset artifact
+                dataset = Dataset.from_dataframe(data=df, name=dataset_name, asset_path=asset_path)
+
+                # Access AutoMLSystem singleton
+                automl_system = AutoMLSystem.get_instance()
+
+                # Register Dataset in artifact registry
+                automl_system.registry.register(dataset)
+                st.success("Dataset successfully registered in the Artifact Registry!")
+            except Exception as e:
+                st.error(f"An error occurred while registering the dataset: {e}")
+
 # Show the selected action's corresponding UI
 if action == "Add Dataset":
     add_dataset()
@@ -124,3 +147,5 @@ elif action == "Delete Dataset":
     delete_dataset()
 elif action == "List Datasets":
     list_datasets()
+elif action == "Register Dataset":
+    upload_and_register_dataset()
