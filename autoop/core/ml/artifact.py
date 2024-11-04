@@ -12,6 +12,17 @@ class Artifact(BaseModel, ABC):
     _tags : List[str] = PrivateAttr()
     _metadata : Dict [Any, Any ] = PrivateAttr()
 
+    def __init__(self, asset_path: str, version: str, name: str, data: bytes, type: str,
+                 tags: Optional[List[str]] = None, metadata: Optional[Dict[Any, Any]] = None, **kwargs):
+        super().__init__(**kwargs)
+        self._asset_path = asset_path
+        self._version = version
+        self._name = name
+        self._data = data
+        self._type = type
+        self._tags = tags if tags is not None else []
+        self._metadata = metadata if metadata is not None else {}
+
     @property
     def asset_path(self) -> str:
         return self._asset_path
@@ -57,13 +68,12 @@ class Artifact(BaseModel, ABC):
             "tags" : self._tags
         }
 
-    @abstractmethod
+   
     def read(self) -> Optional[bytes]:
         """Returns the stored data in bytes if available."""
         return self._data
 
-    @abstractmethod
+    
     def save(self, data: bytes) -> None:
         """Saves the provided data in the artifact."""
         self._data = data
-
