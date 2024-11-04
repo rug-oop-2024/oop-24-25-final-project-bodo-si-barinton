@@ -125,19 +125,19 @@ def feature_selection():
 
                     # Step 7: Initialize and Run Pipeline
                     if st.button("Run Pipeline"):
+                        # Initialize the Pipeline with selected configurations
                         pipeline = Pipeline(
                             dataset=dataset_artifact,
                             model=model,
-                            input_features=[Feature(name=feature) for feature in input_features],
+                            input_features=[Feature(name=feature, type=feature_types[feature]) for feature in input_features],
                             target_feature=Feature(name=target_feature, type=feature_types[target_feature]),
                             metrics=metrics,
                             split=split_ratio
-                        )
-
+                            )
+                            # Execute the pipeline and display results
                         results = pipeline.execute()
                         st.write("Pipeline executed successfully.")
                         st.write("Results:", results)
-
 # Routing actions
 if action == "List Datasets":
     list_datasets()

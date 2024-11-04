@@ -13,10 +13,9 @@ class MultipleLinearRegression(Model):
             version=version,
             name=name,
             data=data if data is not None else b'',
-            type="model",
+            type="regression",
             tags=tags,
             metadata=metadata,
-            model_type="regression",  # Specific to Model
             **kwargs
         )
         

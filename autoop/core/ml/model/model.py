@@ -10,7 +10,6 @@ from typing import Optional, List, Dict, Any
 class Model(Artifact):
 
     _parameters: dict = PrivateAttr(default_factory=dict)
-    _model_type : Literal["classification" , "regression"] = PrivateAttr()
     _is_trained: bool = PrivateAttr(default= False)
 
     def __init__(self, asset_path: str, version: str, name: str, data: bytes, type: str = "model",
@@ -22,7 +21,6 @@ class Model(Artifact):
             type=type,
             tags=tags,
             metadata=metadata)
-        self._model_type = model_type
 
     @property
     def parameters(self):
