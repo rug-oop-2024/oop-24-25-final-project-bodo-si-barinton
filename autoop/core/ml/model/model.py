@@ -5,12 +5,24 @@ import numpy as np
 from copy import deepcopy
 from typing import Literal, Optional
 from pydantic import PrivateAttr
+from typing import Optional, List, Dict, Any
 
 class Model(Artifact):
 
     _parameters: dict = PrivateAttr(default_factory=dict)
-    model_type : Literal["classification" , "regression"]
+    _model_type : Literal["classification" , "regression"] = PrivateAttr()
     _is_trained: bool = PrivateAttr(default= False)
+
+    def __init__(self, asset_path: str, version: str, name: str, data: bytes, type: str = "model",
+                 tags: Optional[List[str]] = None, metadata: Optional[Dict[Any, Any]] = None, model_type: str = None , **kwargs):
+        super().__init__(asset_path=asset_path,
+            version=version,
+            name=name,
+            data=data if data is not None else b'',
+            type=type,
+            tags=tags,
+            metadata=metadata)
+        self._model_type = model_type
 
     @property
     def parameters(self):

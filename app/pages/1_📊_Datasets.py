@@ -2,7 +2,10 @@ import streamlit as st
 import pandas as pd
 from app.core.system import AutoMLSystem  # Access AutoMLSystem for managing artifacts
 from autoop.core.ml.dataset import Dataset
+from autoop.functional.feature import detect_feature_types
 import io
+from typing import List
+from autoop.core.ml.feature import Feature
 
 # Initialize AutoMLSystem singleton instance
 automl_system = AutoMLSystem.get_instance()
@@ -99,6 +102,28 @@ def list_datasets():
         st.write(f"  Asset Path: {dataset_artifact.asset_path}")
         st.write("")
 
+def detect_feature_types(df: pd.DataFrame) -> List[Feature]:
+    """Detect feature types (categorical or numerical) in a DataFrame.
+
+    Args:
+        df: DataFrame containing the dataset.
+
+    Returns:
+        List[Feature]: List of Feature objects with detected types.
+    """
+    features: List[Feature] = []
+
+    if df.empty:
+        raise ValueError("The provided dataset is empty.")
+
+    for column in df.columns:
+        feature_type = "numerical" if pd.api.types.is_numeric_dtype(df[column]) else "categorical"
+        feature = Feature(name=column, type=feature_type)
+        feature.set_data(df[column].values)
+        features.append(feature)
+    
+    return features
+
 # Function to select features and detect task type
 def feature_selection():
     dataset_list = [artifact.name for artifact in automl_system.registry.list(type="dataset")]
@@ -117,26 +142,28 @@ def feature_selection():
         )
 
         if dataset_artifact:
+            # Decode the data from bytes and load it into a DataFrame
             csv_data = dataset_artifact.data.decode()
             df = pd.read_csv(io.StringIO(csv_data))
             
             st.write("Dataset Loaded:")
             st.write(df.head())
 
-            # Step 2: Select Features
-            input_features = st.multiselect("Select input features", df.columns.tolist())
-            target_feature = st.selectbox("Select target feature", df.columns.tolist())
+            # Step 2: Detect Feature Types using the DataFrame
+            features = detect_feature_types(df)  # Pass DataFrame directly
+            feature_names = [feature.name for feature in features]
+            feature_types = {feature.name: feature.type for feature in features}
+
+            # Step 3: Select Features
+            input_features = st.multiselect("Select input features", feature_names)
+            target_feature = st.selectbox("Select target feature", feature_names)
 
             if input_features and target_feature:
                 st.write(f"Selected input features: {input_features}")
-                st.write(f"Selected target feature: {target_feature}")
+                st.write(f"Selected target feature: {target_feature} (Type: {feature_types[target_feature]})")
 
-                # Step 3: Detect Task Type
-                if pd.api.types.is_numeric_dtype(df[target_feature]):
-                    task_type = "Regression"
-                else:
-                    task_type = "Classification"
-
+                # Step 4: Detect Task Type
+                task_type = "Regression" if feature_types[target_feature] == "numerical" else "Classification"
                 st.write(f"Detected task type: {task_type}")
 
 # Routing actions based on the selected option
