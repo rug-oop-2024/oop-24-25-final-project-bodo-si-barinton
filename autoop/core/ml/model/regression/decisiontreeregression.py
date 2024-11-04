@@ -69,11 +69,18 @@ class DecisionTreeRegressor(Model):
     _min_samples_split: int = PrivateAttr()
     _root: Optional[Any] = None
 
-    def __init__(self, max_depth: int = 10, min_samples_split: int = 2):
-        # Call the Pydantic constructor to initialize Pydantic fields
-        super().__init__(model_type="regression")
-        
-        # Initialize private attributes
+    def __init__(self, max_depth: int = 10, min_samples_split: int = 2,asset_path="default_path", version="1.0.0", name="DecisionTreeRegression", 
+                 data=None, tags=None, metadata=None, **kwargs):
+        super().__init__(
+            asset_path=asset_path,
+            version=version,
+            name=name,
+            data=data if data is not None else b'',
+            type="regression",
+            tags=tags,
+            metadata=metadata,
+            **kwargs
+        )
         self._max_depth = max_depth
         self._min_samples_split = min_samples_split
         self._root = None

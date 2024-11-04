@@ -6,9 +6,19 @@ from pydantic import PrivateAttr
 class LassoRegression(Model):
     _model: Lasso = PrivateAttr()
 
-    def __init__(self, **kwargs):
-        # Initialize the base class and set the model type to "classification"
-        super().__init__(model_type="regression", **kwargs)
+    def __init__(self, asset_path="default_path", version="1.0.0", name="LassoRegression", 
+                 data=None, tags=None, metadata=None, **kwargs):
+        # Initialize the base class (Model) and set the model type to "regression"
+        super().__init__(
+            asset_path=asset_path,
+            version=version,
+            name=name,
+            data=data if data is not None else b'',
+            type="regression",
+            tags=tags,
+            metadata=metadata,
+            **kwargs
+        )
         self._model = Lasso()
 
 
