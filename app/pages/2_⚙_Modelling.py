@@ -1,24 +1,26 @@
 import streamlit as st
 import pandas as pd
 import io
+import os
 from app.core.system import AutoMLSystem  
 from autoop.core.ml.feature import Feature
+from autoop.core.ml.pipeline import Pipeline
 from typing import List
-import os
 
+# Initialize AutoMLSystem singleton instance
 automl_system = AutoMLSystem.get_instance()
 
-
+# Set page configuration
 st.set_page_config(page_title="Modeling", page_icon="📈")
 
+# Title and description
 st.title("⚙ Modeling")
 st.write("In this section, you can design a machine learning pipeline to train a model on a dataset.")
 
-
+# Sidebar for choosing actions
 action = st.sidebar.selectbox(
     "Choose an action", ["List Datasets", "Feature Selection"]
 )
-
 
 def list_datasets():
     dataset_list = automl_system.registry.list(type="dataset")
@@ -45,15 +47,9 @@ def detect_feature_types(df: pd.DataFrame) -> List[Feature]:
         features.append(feature)
     return features
 
-import os
-from typing import List
-
 def list_models(task_type: str) -> List[str]:
     """List models based on the task type from 'autoop/core/ml/model' subdirectories."""
-    # Base directory for models
     base_model_folder = "autoop/core/ml/model"
-    
-    # Determine the subfolder based on task type
     subfolder = "regression" if task_type.lower() == "regression" else "classification"
     model_folder = os.path.join(base_model_folder, subfolder)
 
@@ -63,17 +59,15 @@ def list_models(task_type: str) -> List[str]:
         st.error(f"The model folder '{model_folder}' does not exist.")
         return available_models
 
-    # List all files in the model folder for the specified task type, excluding `__init__.py` and other non-model files
     for model_file in os.listdir(model_folder):
         model_name, ext = os.path.splitext(model_file)
-        if ext in [".py", ".pkl"] and model_name != "__init__":  # Add or modify extensions as needed
+        if ext in [".py", ".pkl"] and model_name != "__init__":
             available_models.append(model_name)
 
     if not available_models:
         st.warning(f"No models found for {task_type}.")
     
     return available_models
-
 
 def feature_selection():
     dataset_list = [artifact.name for artifact in automl_system.registry.list(type="dataset")]
@@ -92,7 +86,7 @@ def feature_selection():
         )
 
         if dataset_artifact:
-            # Decode the data and load into DataFrame
+            # Decode data and load into DataFrame
             csv_data = dataset_artifact.data.decode()
             df = pd.read_csv(io.StringIO(csv_data))
             
@@ -122,7 +116,29 @@ def feature_selection():
                     selected_model = st.selectbox("Select a model", available_models)
                     st.write(f"Selected model: {selected_model}")
 
+                    # Step 6: Select Dataset Split
+                    split_ratio = st.slider("Select train/test split ratio", min_value=0.1, max_value=0.9, value=0.8, step=0.05)
 
+                    # Placeholder for model and metrics
+                    model = None  # Replace with actual model initialization
+                    metrics = []  # Add code to initialize metrics as needed
+
+                    # Step 7: Initialize and Run Pipeline
+                    if st.button("Run Pipeline"):
+                        pipeline = Pipeline(
+                            dataset=dataset_artifact,
+                            model=model,
+                            input_features=[Feature(name=feature) for feature in input_features],
+                            target_feature=Feature(name=target_feature, type=feature_types[target_feature]),
+                            metrics=metrics,
+                            split=split_ratio
+                        )
+
+                        results = pipeline.execute()
+                        st.write("Pipeline executed successfully.")
+                        st.write("Results:", results)
+
+# Routing actions
 if action == "List Datasets":
     list_datasets()
 elif action == "Feature Selection":
