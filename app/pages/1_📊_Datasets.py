@@ -114,10 +114,8 @@ def list_datasets():
 def upload_and_register_dataset():
     st.subheader("Upload and Register Dataset")
 
-    # Upload a CSV dataset
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     if uploaded_file is not None:
-        # Read CSV into a DataFrame
         df = pd.read_csv(uploaded_file)
         st.write("Uploaded Data:", df)
 
@@ -126,19 +124,15 @@ def upload_and_register_dataset():
 
         if st.button("Register Dataset"):
             try:
-                # Create a Dataset artifact
                 dataset = Dataset.from_dataframe(data=df, name=dataset_name, asset_path=asset_path)
 
-                # Access AutoMLSystem singleton
                 automl_system = AutoMLSystem.get_instance()
 
-                # Register Dataset in artifact registry
                 automl_system.registry.register(dataset)
                 st.success("Dataset successfully registered in the Artifact Registry!")
             except Exception as e:
                 st.error(f"An error occurred while registering the dataset: {e}")
 
-# Show the selected action's corresponding UI
 if action == "Add Dataset":
     add_dataset()
 elif action == "View Dataset":
