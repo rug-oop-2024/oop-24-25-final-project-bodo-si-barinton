@@ -5,9 +5,20 @@ import numpy as np
 
 class MultipleLinearRegression(Model):
     
-    def __init__(self, **kwargs):
-        # Initialize the base class and set the model type to "regression"
-        super().__init__(model_type="regression", **kwargs)
+    def __init__(self, asset_path="default_path", version="1.0.0", name="MultipleLinearRegression", 
+                 data=None, tags=None, metadata=None, **kwargs):
+        # Initialize the base class (Model) and set the model type to "regression"
+        super().__init__(
+            asset_path=asset_path,
+            version=version,
+            name=name,
+            data=data if data is not None else b'',
+            type="model",
+            tags=tags,
+            metadata=metadata,
+            model_type="regression",  # Specific to Model
+            **kwargs
+        )
         
     def fit(self, observations: np.ndarray, ground_truth: np.ndarray) -> None:
         X = np.hstack((np.ones((observations.shape[0], 1)), observations))

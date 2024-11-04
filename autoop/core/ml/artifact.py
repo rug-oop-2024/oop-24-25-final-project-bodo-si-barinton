@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from pydantic import BaseModel, PrivateAttr
 import base64
 from typing import Optional, List, Dict, Any

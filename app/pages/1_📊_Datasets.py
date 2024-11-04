@@ -12,34 +12,28 @@ st.title("Dataset Manager")
 
 # Sidebar for dataset management actions
 action = st.sidebar.selectbox(
-    "Choose an action", ["Upload Dataset", "View Dataset", "Delete Dataset", "List Datasets"]
+    "Choose an action", ["Upload Dataset", "View Dataset", "Delete Dataset", "List Datasets", "Feature Selection"]
 )
 
 # Function to handle dataset upload and save
 def upload_dataset():
-    # File uploader for CSV files
     uploaded_file = st.file_uploader("Upload a CSV dataset", type=["csv"])
     dataset_name = st.text_input("Dataset Name")
     asset_path = st.text_input("Asset Path (relative to storage)")
 
     if uploaded_file is not None and dataset_name and asset_path:
-        # Load CSV data into a DataFrame
         df = pd.read_csv(uploaded_file)
         st.write("Dataset Preview:", df.head())
 
-        # Convert DataFrame to CSV bytes to store as an artifact
         encoded_data = df.to_csv(index=False).encode()
 
-        # Create a Dataset artifact and register it using AutoMLSystem
         dataset_artifact = Dataset(
             name=dataset_name,
             asset_path=asset_path,
             version="1.0.0",
-            data=encoded_data,
-            type="dataset"
+            data=encoded_data
         )
 
-        # Register the dataset artifact
         automl_system.registry.register(dataset_artifact)
         
         st.success(f"Dataset '{dataset_name}' uploaded and saved successfully as an artifact.")
@@ -52,11 +46,9 @@ def view_dataset():
         st.write("No datasets available.")
         return
 
-    # Dropdown to select a dataset by name
     selected_dataset = st.selectbox("Select a dataset to view", dataset_list)
 
     if selected_dataset:
-        # Retrieve the selected dataset artifact
         dataset_artifact = next(
             (artifact for artifact in automl_system.registry.list(type="dataset") if artifact.name == selected_dataset),
             None
@@ -68,7 +60,6 @@ def view_dataset():
             st.write(f"Version: {dataset_artifact.version}")
             st.write("Dataset Content:")
             
-            # Convert CSV bytes back to DataFrame for display
             csv_data = dataset_artifact.data.decode()
             df = pd.read_csv(io.StringIO(csv_data))
             st.write(df)
@@ -81,7 +72,6 @@ def delete_dataset():
         st.write("No datasets available.")
         return
 
-    # Dropdown to select dataset for deletion
     selected_dataset = st.selectbox("Select a dataset to delete", dataset_list)
 
     if st.button("Delete Dataset"):
@@ -91,7 +81,6 @@ def delete_dataset():
         )
         
         if dataset_artifact:
-            # Delete the dataset artifact
             automl_system.registry.delete(dataset_artifact.id)
             st.success(f"Dataset '{selected_dataset}' deleted successfully.")
 
@@ -110,6 +99,46 @@ def list_datasets():
         st.write(f"  Asset Path: {dataset_artifact.asset_path}")
         st.write("")
 
+# Function to select features and detect task type
+def feature_selection():
+    dataset_list = [artifact.name for artifact in automl_system.registry.list(type="dataset")]
+
+    if not dataset_list:
+        st.write("No datasets available.")
+        return
+
+    # Step 1: Select Dataset
+    selected_dataset = st.selectbox("Select a dataset for feature selection", dataset_list)
+
+    if selected_dataset:
+        dataset_artifact = next(
+            (artifact for artifact in automl_system.registry.list(type="dataset") if artifact.name == selected_dataset),
+            None
+        )
+
+        if dataset_artifact:
+            csv_data = dataset_artifact.data.decode()
+            df = pd.read_csv(io.StringIO(csv_data))
+            
+            st.write("Dataset Loaded:")
+            st.write(df.head())
+
+            # Step 2: Select Features
+            input_features = st.multiselect("Select input features", df.columns.tolist())
+            target_feature = st.selectbox("Select target feature", df.columns.tolist())
+
+            if input_features and target_feature:
+                st.write(f"Selected input features: {input_features}")
+                st.write(f"Selected target feature: {target_feature}")
+
+                # Step 3: Detect Task Type
+                if pd.api.types.is_numeric_dtype(df[target_feature]):
+                    task_type = "Regression"
+                else:
+                    task_type = "Classification"
+
+                st.write(f"Detected task type: {task_type}")
+
 # Routing actions based on the selected option
 if action == "Upload Dataset":
     upload_dataset()
@@ -119,3 +148,5 @@ elif action == "Delete Dataset":
     delete_dataset()
 elif action == "List Datasets":
     list_datasets()
+elif action == "Feature Selection":
+    feature_selection()
