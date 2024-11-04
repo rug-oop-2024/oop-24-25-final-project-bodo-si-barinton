@@ -16,7 +16,7 @@ automl_system = AutoMLSystem.get_instance()
 MODEL_CLASSES = {
     "Regression": {
         "MultipleLinearRegression": MultipleLinearRegression,
-        "Lasso" : Lasso,
+        "Lasso": Lasso,
         "DecisionTreeRegressor": DecisionTreeRegressor
     },
     "Classification": {
@@ -25,6 +25,16 @@ MODEL_CLASSES = {
         "LogisticRegression": LogisticRegression
     }
 }
+
+# Function to return a list of compatible metrics based on the task type
+def get_compatible_metrics(task_type: str) -> List[str]:
+    """Return a list of compatible metrics based on the task type."""
+    if task_type == "Classification":
+        return ["accuracy", "logloss", "micro", "macro"]
+    elif task_type == "Regression":
+        return ["mean_squared_error", "mean_absolute_error", "root_mean_squared_error"]
+    else:
+        return []
 
 # Set page configuration
 st.set_page_config(page_title="Modeling", page_icon="📈")
@@ -51,7 +61,6 @@ def list_datasets():
         st.write(f"  **Version:** {dataset_artifact.version}")
         st.write(f"  **Asset Path:** {dataset_artifact.asset_path}")
         st.write("")
-
 
 def detect_feature_types(df: pd.DataFrame) -> List[Feature]:
     """Detect feature types (categorical or numerical) in a DataFrame."""
@@ -111,9 +120,8 @@ def feature_selection():
                 model_chosen = selected_model_class()
 
                 # Step 6: Select Compatible Metrics
-                compatible_metrics = [metric for metric in METRICS if (task_type == "Regression" and "error" in metric) or (task_type == "Classification" and "accuracy" in metric)]
+                compatible_metrics = get_compatible_metrics(task_type)
                 selected_metrics = st.multiselect("Select metrics", compatible_metrics)
-
                 metric_objects = [get_metric(metric) for metric in selected_metrics]
 
                 # Step 7: Select Dataset Split
