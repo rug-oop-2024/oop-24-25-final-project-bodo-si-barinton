@@ -1,14 +1,30 @@
 import streamlit as st
 import pandas as pd
 import io
-import os
 from app.core.system import AutoMLSystem  
 from autoop.core.ml.feature import Feature
 from autoop.core.ml.pipeline import Pipeline
+from autoop.core.ml.metric import METRICS, get_metric
 from typing import List
+from autoop.core.ml.model.classification import SVM, BayesClassification, LogisticRegression
+from autoop.core.ml.model.regression import Lasso, MultipleLinearRegression, DecisionTreeRegressor
+from autoop.core.ml.model import Model
 
 # Initialize AutoMLSystem singleton instance
 automl_system = AutoMLSystem.get_instance()
+
+MODEL_CLASSES = {
+    "Regression": {
+        "MultipleLinearRegression": MultipleLinearRegression,
+        "Lasso" : Lasso,
+        "DecisionTreeRegressor": DecisionTreeRegressor
+    },
+    "Classification": {
+        "SVM": SVM,
+        "BayesClassification": BayesClassification,
+        "LogisticRegression": LogisticRegression
+    }
+}
 
 # Set page configuration
 st.set_page_config(page_title="Modeling", page_icon="📈")
@@ -46,28 +62,6 @@ def detect_feature_types(df: pd.DataFrame) -> List[Feature]:
         feature.set_data(df[column].values)
         features.append(feature)
     return features
-
-def list_models(task_type: str) -> List[str]:
-    """List models based on the task type from 'autoop/core/ml/model' subdirectories."""
-    base_model_folder = "autoop/core/ml/model"
-    subfolder = "regression" if task_type.lower() == "regression" else "classification"
-    model_folder = os.path.join(base_model_folder, subfolder)
-
-    available_models = []
-
-    if not os.path.isdir(model_folder):
-        st.error(f"The model folder '{model_folder}' does not exist.")
-        return available_models
-
-    for model_file in os.listdir(model_folder):
-        model_name, ext = os.path.splitext(model_file)
-        if ext in [".py", ".pkl"] and model_name != "__init__":
-            available_models.append(model_name)
-
-    if not available_models:
-        st.warning(f"No models found for {task_type}.")
-    
-    return available_models
 
 def feature_selection():
     dataset_list = [artifact.name for artifact in automl_system.registry.list(type="dataset")]
@@ -110,34 +104,47 @@ def feature_selection():
                 task_type = "Regression" if feature_types[target_feature] == "numerical" else "Classification"
                 st.write(f"Detected task type: {task_type}")
 
-                # Step 5: Prompt User to Select Model Based on Task Type
-                available_models = list_models(task_type)
-                if available_models:
-                    selected_model = st.selectbox("Select a model", available_models)
-                    st.write(f"Selected model: {selected_model}")
+                # Step 5: Select Model Based on Task Type
+                available_models = MODEL_CLASSES[task_type]
+                selected_model_name = st.selectbox("Select a model", list(available_models.keys()))
+                selected_model_class = available_models[selected_model_name]
+                model_chosen = selected_model_class()
 
-                    # Step 6: Select Dataset Split
-                    split_ratio = st.slider("Select train/test split ratio", min_value=0.1, max_value=0.9, value=0.8, step=0.05)
+                # Step 6: Select Compatible Metrics
+                compatible_metrics = [metric for metric in METRICS if (task_type == "Regression" and "error" in metric) or (task_type == "Classification" and "accuracy" in metric)]
+                selected_metrics = st.multiselect("Select metrics", compatible_metrics)
 
-                    # Placeholder for model and metrics
-                    model = None  # Replace with actual model initialization
-                    metrics = []  # Add code to initialize metrics as needed
+                metric_objects = [get_metric(metric) for metric in selected_metrics]
 
-                    # Step 7: Initialize and Run Pipeline
-                    if st.button("Run Pipeline"):
-                        # Initialize the Pipeline with selected configurations
-                        pipeline = Pipeline(
-                            dataset=dataset_artifact,
-                            model=model,
-                            input_features=[Feature(name=feature, type=feature_types[feature]) for feature in input_features],
-                            target_feature=Feature(name=target_feature, type=feature_types[target_feature]),
-                            metrics=metrics,
-                            split=split_ratio
-                            )
-                            # Execute the pipeline and display results
-                        results = pipeline.execute()
-                        st.write("Pipeline executed successfully.")
-                        st.write("Results:", results)
+                # Step 7: Select Dataset Split
+                split_ratio = st.slider("Select train/test split ratio", min_value=0.1, max_value=0.9, value=0.8, step=0.05)
+
+                # Step 8: Run Pipeline and Display Summary
+                if st.button("Run Pipeline"):
+                    # Initialize the Pipeline with selected configurations
+                    pipeline = Pipeline(
+                        dataset=dataset_artifact,
+                        model=model_chosen,
+                        input_features=[Feature(name=feature, type=feature_types[feature]) for feature in input_features],
+                        target_feature=Feature(name=target_feature, type=feature_types[target_feature]),
+                        metrics=metric_objects,
+                        split=split_ratio
+                    )
+                    
+                    # Display Pipeline Summary
+                    st.write("### Pipeline Summary")
+                    st.write(f"- **Model**: {selected_model_name}")
+                    st.write(f"- **Task Type**: {task_type}")
+                    st.write(f"- **Selected Metrics**: {', '.join(selected_metrics)}")
+                    st.write(f"- **Split Ratio**: {split_ratio}")
+                    st.write(f"- **Input Features**: {input_features}")
+                    st.write(f"- **Target Feature**: {target_feature}")
+
+                    # Execute pipeline
+                    results = pipeline.execute()
+                    st.write("Pipeline executed successfully.")
+                    st.write("Results:", results)
+
 # Routing actions
 if action == "List Datasets":
     list_datasets()
