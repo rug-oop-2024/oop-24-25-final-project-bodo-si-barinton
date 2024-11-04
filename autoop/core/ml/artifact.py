@@ -9,14 +9,14 @@ class Artifact(BaseModel, ABC):
     _name: str = PrivateAttr()
     _data: bytes = PrivateAttr()
     _type: str = PrivateAttr()
-    _tags : List[str] = PrivateAttr()
-    _metadata : Dict [Any, Any ] = PrivateAttr()
+    _tags: List[str] = PrivateAttr()
+    _metadata: Dict[Any, Any] = PrivateAttr()
 
     def __init__(self, asset_path: str, version: str, name: str, data: bytes, type: str,
                  tags: Optional[List[str]] = None, metadata: Optional[Dict[Any, Any]] = None, **kwargs):
         super().__init__(**kwargs)
         self._asset_path = asset_path
-        self._version = version
+        self._version = version.replace(";", "_").replace(".", "_").replace(",", "_").replace("=", "_")
         self._name = name
         self._data = data
         self._type = type
@@ -53,8 +53,8 @@ class Artifact(BaseModel, ABC):
 
     @property
     def id(self) -> str:
-        encoded_path = base64.b64encode(self._asset_path.encode()).decode()
-        return f"{encoded_path}:{self._version}"
+        encoded_path = base64.b64encode(self._asset_path.encode()).decode().rstrip("=")
+        return f"{encoded_path}_{self._version}"
     
     @property
     def details(self) -> dict:
@@ -65,15 +65,13 @@ class Artifact(BaseModel, ABC):
             "name": self._name,
             "type": self._type,
             "has_data": self._data is not None,
-            "tags" : self._tags
+            "tags": self._tags
         }
 
-   
     def read(self) -> Optional[bytes]:
         """Returns the stored data in bytes if available."""
         return self._data
 
-    
     def save(self, data: bytes) -> None:
         """Saves the provided data in the artifact."""
         self._data = data
