@@ -5,24 +5,29 @@ from app.core.system import AutoMLSystem
 from autoop.core.ml.feature import Feature
 from autoop.core.ml.pipeline import Pipeline
 from autoop.core.ml.metric import METRICS, get_metric
-from typing import List
-from autoop.core.ml.model.classification import SVM, BayesClassification, LogisticRegression
-from autoop.core.ml.model.regression import Lasso, MultipleLinearRegression, DecisionTreeRegressor
+from typing import List,Dict
+from autoop.core.ml.model.classification.bayes import BayesClassification
+from autoop.core.ml.model.classification.logistic_regression import LogisticClassification
+from autoop.core.ml.model.classification.svm import SVM
+from autoop.core.ml.model.regression.lasso import LassoRegression
+from autoop.core.ml.model.regression.decisiontreeregression import DecisionTreeRegressor
+from autoop.core.ml.model.regression.linearregression import MultipleLinearRegression
 from autoop.core.ml.model import Model
 from autoop.core.ml.dataset import Dataset
+from autoop.functional.feature import detect_feature_types
 
 automl_system = AutoMLSystem.get_instance()
 
-MODEL_CLASSES = {
+MODEL_CLASSES: Dict[str, Dict[str, Model]] = {
     "Regression": {
-        "MultipleLinearRegression": MultipleLinearRegression,
-        "Lasso": Lasso,
-        "DecisionTreeRegressor": DecisionTreeRegressor
+        "MultipleLinearRegression": MultipleLinearRegression(),
+        "Lasso": LassoRegression(),
+        "DecisionTreeRegressor": DecisionTreeRegressor()
     },
     "Classification": {
-        "SVM": SVM,
-        "BayesClassification": BayesClassification,
-        "LogisticRegression": LogisticRegression
+        "SVM": SVM(),
+        "BayesClassification": BayesClassification(),
+        "LogisticRegression": LogisticClassification()
     }
 }
 
@@ -57,20 +62,10 @@ def list_datasets():
 
     st.write("Available Datasets:")
     for dataset_artifact in dataset_list:
-        st.write(f"- **Name:** {dataset_artifact.name}")
-        st.write(f"  **Version:** {dataset_artifact.version}")
-        st.write(f"  **Asset Path:** {dataset_artifact.asset_path}")
+        st.write(f"- *Name:* {dataset_artifact.name}")
+        st.write(f"  *Version:* {dataset_artifact.version}")
+        st.write(f"  *Asset Path:* {dataset_artifact.asset_path}")
         st.write("")
-
-def detect_feature_types(df: pd.DataFrame) -> List[Feature]:
-    """Detect feature types (categorical or numerical) in a DataFrame."""
-    features: List[Feature] = []
-    for column in df.columns:
-        feature_type = "numerical" if pd.api.types.is_numeric_dtype(df[column]) else "categorical"
-        feature = Feature(name=column, type=feature_type)
-        feature.set_data(df[column].values)
-        features.append(feature)
-    return features
 
 def feature_selection():
     dataset_list = [artifact.name for artifact in automl_system.registry.list(type="dataset")]
@@ -84,12 +79,11 @@ def feature_selection():
 
     if selected_dataset:
         dataset_artifact = next(
-            (artifact for artifact in automl_system.registry.list(type="dataset") if artifact.name == selected_dataset),
+            (automl_system.registry.get(artifact.id) for artifact in automl_system.registry.list(type="dataset") if artifact.name == selected_dataset),
             None
         )
 
         if dataset_artifact:
-           
             csv_data = dataset_artifact.data.decode()
             df = pd.read_csv(io.StringIO(csv_data))
 
@@ -98,7 +92,7 @@ def feature_selection():
 
             dataset_instance = Dataset.from_dataframe(df, name=selected_dataset, asset_path=dataset_artifact.asset_path)
 
-            features = detect_feature_types(df)
+            features = detect_feature_types(dataset_instance)
             feature_names = [feature.name for feature in features]
             feature_types = {feature.name: feature.type for feature in features}
 
@@ -118,7 +112,7 @@ def feature_selection():
                 available_models = MODEL_CLASSES[task_type]
                 selected_model_name = st.selectbox("Select a model", list(available_models.keys()))
                 selected_model_class = available_models[selected_model_name]
-                model_chosen = selected_model_class()
+        
 
                 
                 compatible_metrics = get_compatible_metrics(task_type)
@@ -131,11 +125,8 @@ def feature_selection():
                 
                 if st.button("Run Pipeline"):
                     pipeline = Pipeline(
-
-
-
                         dataset= dataset_instance,
-                        model=model_chosen,
+                        model=selected_model_class,
                         input_features=[Feature(name=feature, type=feature_types[feature]) for feature in input_features],
                         target_feature=Feature(name=target_feature, type=feature_types[target_feature]),
                         metrics=metric_objects,
@@ -144,12 +135,12 @@ def feature_selection():
                     
                     
                     st.write("### Pipeline Summary")
-                    st.write(f"- **Model**: {selected_model_name}")
-                    st.write(f"- **Task Type**: {task_type}")
-                    st.write(f"- **Selected Metrics**: {', '.join(selected_metrics)}")
-                    st.write(f"- **Split Ratio**: {split_ratio}")
-                    st.write(f"- **Input Features**: {input_features}")
-                    st.write(f"- **Target Feature**: {target_feature}")
+                    st.write(f"- *Model*: {selected_model_name}")
+                    st.write(f"- *Task Type*: {task_type}")
+                    st.write(f"- *Selected Metrics*: {', '.join(selected_metrics)}")
+                    st.write(f"- *Split Ratio*: {split_ratio}")
+                    st.write(f"- *Input Features*: {input_features}")
+                    st.write(f"- *Target Feature*: {target_feature}")
 
                     
                     results = pipeline.execute()

@@ -4,13 +4,12 @@ import numpy as np
 from pydantic import PrivateAttr
 
 
-class LogisticRegression(Model):
+class LogisticClassification(Model):
 
     _classifier: LogisticRegression = PrivateAttr()
 
-    def __init__(self, asset_path="default_path", version="1.0.0", name="LogisticRegression", 
+    def __init__(self, asset_path="default_path", version="1.0.0", name="LogisticClassification", 
                  data=None, tags=None, metadata=None, **kwargs):
-        # Initialize the base class (Model) and set the model type to "regression"
         super().__init__(
             asset_path=asset_path,
             version=version,
