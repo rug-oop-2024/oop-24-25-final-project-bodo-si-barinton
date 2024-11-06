@@ -156,17 +156,6 @@ def feature_selection():
                     st.write("Pipeline executed successfully.")
                     st.write("Results:", results)
 
-                    
-                    pipeline_name = st.text_input("Enter a name for this pipeline:")
-                    pipeline_version = st.text_input("Enter a version for this pipeline:")
-                    
-                    if st.button("Save Pipeline"):
-                        if pipeline_name and pipeline_version:
-                            pipeline.save(name=pipeline_name, version=pipeline_version)
-                            automl_system.registry.add(pipeline)
-                            st.write(f"Pipeline '{pipeline_name}' (version {pipeline_version}) saved and registered successfully.")
-                        else:
-                            st.warning("Please enter both a name and a version for the pipeline.")
 
 
 

@@ -128,6 +128,4 @@ Pipeline(
         "evaluation_metrics": self._metrics_results,
         "predictions": self._predictions
         }
-        
-
     

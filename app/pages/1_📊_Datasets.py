@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from app.core.system import AutoMLSystem  # Access AutoMLSystem for managing artifacts
+from app.core.system import AutoMLSystem 
 from autoop.core.ml.dataset import Dataset
 from autoop.functional.feature import detect_feature_types
 import io
