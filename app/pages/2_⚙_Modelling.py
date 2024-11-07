@@ -17,16 +17,20 @@ from autoop.core.ml.artifact import Artifact
 
 automl_system = AutoMLSystem.get_instance()
 
+
+if "pipeline" not in st.session_state:
+    st.session_state["pipeline"] = None
+
 MODEL_CLASSES: Dict[str, Dict[str, Model]] = {
     "Regression": {
-        "MultipleLinearRegression": MultipleLinearRegression,
-        "Lasso": LassoRegression,
-        "DecisionTreeRegressor": DecisionTreeRegressor
+        "MultipleLinearRegression": MultipleLinearRegression(),
+        "Lasso": LassoRegression(),
+        "DecisionTreeRegressor": DecisionTreeRegressor()
     },
     "Classification": {
-        "SVM": SVM,
-        "BayesClassification": BayesClassification,
-        "LogisticRegression": LogisticClassification
+        "SVM": SVM(),
+        "BayesClassification": BayesClassification(),
+        "LogisticRegression": LogisticClassification()
     }
 }
 
@@ -106,8 +110,6 @@ def feature_selection():
                         "type": "pipeline_config",
                         "data": pickle.dumps({
                             "model_type": selected_model_name,
-                            "input_features": input_features,
-                            "target_feature": target_feature,
                             "split": split_ratio,
                             "metrics": selected_metrics,
                             "task_type": task_type
@@ -122,6 +124,9 @@ def feature_selection():
                     st.write(f"- *Split Ratio*: {split_ratio}")
                     st.write(f"- *Input Features*: {input_features}")
                     st.write(f"- *Target Feature*: {target_feature}")
+
+                    results = st.session_state.pipeline.execute()
+                    st.write("Results:", results)
 
                 pipeline_name = st.text_input("Enter a name for the pipeline artifact", key="pipeline_name")
                 pipeline_version = st.text_input("Enter a version for the pipeline artifact", key="pipeline_version")
