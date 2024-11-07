@@ -4,18 +4,22 @@ import base64
 from typing import Optional, List, Dict, Any
 
 class Artifact(BaseModel, ABC):
-    _asset_path: str = PrivateAttr()
-    _version: str = PrivateAttr()
+    _asset_path: str = PrivateAttr(default="default_path")
+    _version: str = PrivateAttr(default="1.0")
     _name: str = PrivateAttr()
     _data: bytes = PrivateAttr()
     _type: str = PrivateAttr()
-    _tags: List[str] = PrivateAttr()
-    _metadata: Dict[Any, Any] = PrivateAttr()
+    _tags: List[str] = PrivateAttr(default_factory=list)
+    _metadata: Dict[Any, Any] = PrivateAttr(default_factory=dict)
 
-    def __init__(self, asset_path: str, version: str, name: str, data: bytes, type: str,
-                 tags: Optional[List[str]] = None, metadata: Optional[Dict[Any, Any]] = None, **kwargs):
+    def __init__(self, name: str, data: bytes, type: str = "GenericType", 
+                 asset_path: Optional[str] = "default_path", 
+                 version: Optional[str] = "1.0", 
+                 tags: Optional[List[str]] = None, 
+                 metadata: Optional[Dict[Any, Any]] = None, 
+                 **kwargs):
         super().__init__(**kwargs)
-        self._asset_path = asset_path
+        self._asset_path = asset_path if asset_path is not None else "default_path"
         self._version = version.replace(";", "_").replace(".", "_").replace(",", "_").replace("=", "_")
         self._name = name
         self._data = data
@@ -75,3 +79,7 @@ class Artifact(BaseModel, ABC):
     def save(self, data: bytes) -> None:
         """Saves the provided data in the artifact."""
         self._data = data
+
+    def get(self, attribute_type: str) -> Optional[Any]:
+        """Retrieve an attribute by type if it exists."""
+        return getattr(self, attribute_type, None)

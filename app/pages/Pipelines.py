@@ -1,51 +1,58 @@
 import streamlit as st
-import pandas as pd
 from app.core.system import AutoMLSystem
-
+import pickle
 
 automl_system = AutoMLSystem.get_instance()
+action = st.sidebar.selectbox(
+    "Choose an action", ["View Saved Pipelines", "Load Pipeline Summary"]
+)
 
-st.set_page_config(page_title="Pipeline Deployment", page_icon="🚀")
+def view_saved_pipelines():
+    st.title("📋 Existing Saved Pipelines")
 
-
-st.title("🚀 Pipeline Deployment")
-st.write("Load and deploy a saved pipeline to make predictions on new data.")
-
-def pipeline_deployment():
     saved_pipelines = automl_system.registry.list(type="pipeline")
-    pipeline_names = [p.name for p in saved_pipelines]
-    
-    if pipeline_names:
-        selected_pipeline = st.selectbox("Select a pipeline to load", pipeline_names)
-        
-        if selected_pipeline:
-            pipeline = next((p for p in saved_pipelines if p.name == selected_pipeline), None)
-            
-            if pipeline:
-                
-                st.write("### Pipeline Summary")
-                st.write(pipeline.summary())
-                
-                
-                uploaded_file = st.file_uploader("Upload a CSV file for predictions")
-                
-                if uploaded_file is not None:
-                    df = pd.read_csv(uploaded_file)
-                    st.write("Data Loaded for Prediction:")
-                    st.write(df.head())
-                    
-                    predictions = pipeline.predict(df)
-                    
-                    st.write("### Predictions")
-                    st.write(predictions)
-                    
-                    st.download_button(
-                        label="Download Predictions as CSV",
-                        data=predictions.to_csv(index=False),
-                        file_name="predictions.csv",
-                        mime="text/csv"
-                    )
-    else:
-        st.write("No saved pipelines available.")
 
-pipeline_deployment()
+    if not saved_pipelines:
+        st.write("No saved pipelines found.")
+        return
+
+    st.write("## List of Saved Pipelines:")
+    for pipeline in saved_pipelines:
+        st.write(f"- **Name**: {pipeline.name}")
+        st.write(f"  - **Version**: {pipeline.version}")
+        st.write(f"  - **Asset Path**: {pipeline.asset_path}")
+        st.write("")
+
+def load_and_show_pipeline_summary():
+    st.title("🔄 Load and Show Pipeline Summary")
+
+    saved_pipelines = automl_system.registry.list(type="pipeline")
+
+    if not saved_pipelines:
+        st.write("No saved pipelines available.")
+        return
+
+    pipeline_options = {f"{p.name} (v{p.version})": p for p in saved_pipelines}
+    selected_pipeline_name = st.selectbox("Select a pipeline to view", list(pipeline_options.keys()))
+
+    if selected_pipeline_name:
+        selected_pipeline = pipeline_options[selected_pipeline_name]
+
+        try:
+            pipeline_data = pickle.loads(selected_pipeline.data)
+            st.write("## Pipeline Summary")
+            st.write(f"**Name**: {selected_pipeline.name}")
+            st.write(f"**Version**: {selected_pipeline.version}")
+            st.write(f"**Type**: {selected_pipeline.type}")
+            st.write(f"**Asset Path**: {selected_pipeline.asset_path}")
+            st.write("### Configuration Data:")
+            st.write(pipeline_data)  
+
+        except Exception as e:
+            st.error(f"Failed to load pipeline data: {e}")
+
+
+if action == "View Saved Pipelines":
+    view_saved_pipelines()
+elif action == "Load Pipeline Summary":
+    load_and_show_pipeline_summary()

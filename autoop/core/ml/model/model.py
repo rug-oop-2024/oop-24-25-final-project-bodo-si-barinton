@@ -6,6 +6,7 @@ from copy import deepcopy
 from typing import Literal, Optional
 from pydantic import PrivateAttr
 from typing import Optional, List, Dict, Any
+import pickle
 
 class Model(Artifact):
 
@@ -21,6 +22,22 @@ class Model(Artifact):
             type=type,
             tags=tags,
             metadata=metadata)
+        
+    def to_artifact(self, name: str) -> Artifact:
+        """Converts the model to an Artifact instance for saving."""
+        
+        # Serialize the model instance to bytes
+        model_data = pickle.dumps(self)
+        
+        # Create an artifact with the serialized data and metadata
+        return Artifact(
+            name=name,
+            data=model_data,
+            type="Model",
+            asset_path=f"path/to/{name}",
+            version=self.version,
+            metadata={"model_type": self.type}
+        )
 
     @property
     def parameters(self):
