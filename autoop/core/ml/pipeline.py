@@ -23,7 +23,7 @@ class Pipeline:
         model: Model,
         input_features: List[Feature],
         target_feature: Feature,
-        split: float= 0.8,
+        split: float = 0.8,
     ) -> None:
         """
         Initialize a Pipeline instance.
@@ -50,7 +50,8 @@ class Pipeline:
             raise ValueError(
                 "Model type must be classification for categorical feature"
             )
-        if (target_feature.type == "continuous"
+        if (
+            target_feature.type == "continuous"
             and model.type != "regression"
         ):
             raise ValueError(
@@ -150,18 +151,18 @@ Pipeline(
         """
         split = self._split
         self._train_X = [
-            vector[ : int(split * len(vector))] 
+            vector[: int(split * len(vector))]
             for vector in self._input_vectors
         ]
         self._test_X = [
-            vector[int(split * len(vector)) :] 
+            vector[int(split * len(vector)):]
             for vector in self._input_vectors
         ]
         self._train_y = self._output_vector[
             : int(split * len(self._output_vector))
         ]
         self._test_y = self._output_vector[
-            int(split * len(self._output_vector)) :
+            int(split * len(self._output_vector)):
         ]
 
     def _compact_vectors(self, vectors: List[np.array]) -> np.array:
@@ -218,14 +219,14 @@ Pipeline(
         Y_train = self._train_y
         self._training_metrics_results = []
         train_predictions = self._model.predict(X_train)
-    
+
         for metric in self._metrics:
             train_result = metric.evaluate(train_predictions, Y_train)
             self._training_metrics_results.append((metric, train_result))
-        
+
         self._evaluate()
         return {
             "training_metrics": self._training_metrics_results,
-        "evaluation_metrics": self._metrics_results,
-        "predictions": self._predictions
+            "evaluation_metrics": self._metrics_results,
+            "predictions": self._predictions
         }
