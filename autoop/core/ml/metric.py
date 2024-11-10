@@ -225,7 +225,7 @@ class RootMeanSquaredErrorMetric(MeanSquaredErrorMetric):
 
 class LogLossMetric(Metric):
     """
-    Metric for calculating Log Loss for multi-class classification.
+    Metric for calculating Log Loss for binary or multi-class classification.
     """
 
     def evaluate(
@@ -235,25 +235,39 @@ class LogLossMetric(Metric):
         Evaluate the Log Loss metric.
 
         Args:
-            observations (np.ndarray): The observed values.
+            observations (np.ndarray): The predicted probabilities.
             ground_truth (np.ndarray): The ground truth values.
 
         Returns:
             int | float: The Log Loss value.
         """
         observations = np.clip(observations, 1e-15, 1 - 1e-15)
-        log_loss_sum = 0.0
-        classes = get_unique_classes(ground_truth)
 
-        for cls in classes:
-            ground_truth_binary = (ground_truth == cls).astype(float)
-            observation_prob = observations[:, cls]
-            log_loss_sum += -np.sum(
-                ground_truth_binary * np.log(observation_prob) +
-                (1 - ground_truth_binary) * np.log(1 - observation_prob)
+        if observations.ndim == 1:
+            ground_truth_binary = ground_truth.astype(float)
+            log_loss = -np.mean(
+                ground_truth_binary * np.log(observations) +
+                (1 - ground_truth_binary) * np.log(1 - observations)
             )
+        else:
+            log_loss_sum = 0.0
+            classes = get_unique_classes(ground_truth)
+            
+            for cls in classes:
+                ground_truth_binary = (ground_truth == cls).astype(float)
+                
+                if cls < observations.shape[1]:
+                    observation_prob = observations[:, cls]
+                    log_loss_sum += -np.sum(
+                        ground_truth_binary * np.log(observation_prob) +
+                        (1 - ground_truth_binary) * np.log(1 - observation_prob)
+                    )
+                else:
+                    raise ValueError("Class index exceeds number of columns in observations array.")
 
-        return log_loss_sum / len(ground_truth)
+            log_loss = log_loss_sum / len(ground_truth)
+
+        return log_loss
 
 
 class MicroAverageMetric(Metric):

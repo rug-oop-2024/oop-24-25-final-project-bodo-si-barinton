@@ -1,7 +1,8 @@
 import io
 import pickle
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -133,7 +134,6 @@ def feature_selection() -> None:
             feature_types: Dict[str, str] = {
                 feature.name: feature.type for feature in features
             }
-
             input_features: List[str] = st.multiselect(
                 "Select input features", feature_names
             )
