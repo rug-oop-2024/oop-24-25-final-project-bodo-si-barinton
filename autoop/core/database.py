@@ -84,7 +84,7 @@ class Database:
             collection: The collection to list items from.
 
         Returns:
-            List[Tuple[str, dict]]: List of (id, data) pairs from the collection.
+            List[Tuple[str, dict]]: List of (id, data) pairs.
         """
         if not self._data.get(collection, None):
             return []

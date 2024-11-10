@@ -47,7 +47,7 @@ def get_metric(name: str) -> "Metric":
 
 def count_metrics_per_class(
     observations: np.ndarray, ground_truth: np.ndarray, cls: int
-) -> Any:
+) -> tuple:
     """
     Count metrics for a specific class.
 

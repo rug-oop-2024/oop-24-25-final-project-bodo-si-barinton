@@ -145,14 +145,14 @@ def load_and_show_pipeline_summary_and_predict() -> None:
             st.write(f"Type: {selected_pipeline.type}")
             st.write(f"Asset Path: {selected_pipeline.asset_path}")
             tags_string = (
-                ', '.join(selected_pipeline.tags) 
-                if selected_pipeline.tags 
+                ', '.join(selected_pipeline.tags)
+                if selected_pipeline.tags
                 else 'None'
             )
             st.write(f"Tags: {tags_string}")
             metadata_string = (
-                selected_pipeline.metadata 
-                if selected_pipeline.metadata 
+                selected_pipeline.metadata
+                if selected_pipeline.metadata
                 else 'None'
             )
             st.write(f"Metadata: {metadata_string}")

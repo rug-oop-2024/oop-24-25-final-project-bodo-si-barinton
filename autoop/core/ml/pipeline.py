@@ -23,7 +23,7 @@ class Pipeline:
         model: Model,
         input_features: List[Feature],
         target_feature: Feature,
-        split=0.8,
+        split : float=0.8,
     ) -> None:
         """
         Initialize a Pipeline instance.
@@ -43,8 +43,10 @@ class Pipeline:
         self._metrics = metrics
         self._artifacts = {}
         self._split = split
-        if target_feature.type == "categorical" and \
-            model.type != "classification":
+        if (
+            target_feature.type == "categorical"
+            and model.type != "classification"
+        ):
             raise ValueError(
                 "Model type must be classification for categorical target feature"
             )
@@ -203,19 +205,26 @@ Pipeline(
         """
         self._preprocess_features()
         self._split_data()
+        if self._target_feature.type == "categorical":
+            if self._train_y.ndim > 1 and self._train_y.shape[1] > 1:
+                self._train_y = np.argmax(self._train_y, axis=1)
+                self._test_y = np.argmax(self._test_y, axis=1)
+            else:
+                self._train_y = self._train_y.ravel()
+                self._test_y = self._test_y.ravel()
         self._train()
         X_train = self._compact_vectors(self._train_X)
         Y_train = self._train_y
         self._training_metrics_results = []
         train_predictions = self._model.predict(X_train)
-
+    
         for metric in self._metrics:
             train_result = metric.evaluate(train_predictions, Y_train)
             self._training_metrics_results.append((metric, train_result))
-
+        
         self._evaluate()
         return {
             "training_metrics": self._training_metrics_results,
-            "evaluation_metrics": self._metrics_results,
-            "predictions": self._predictions,
+        "evaluation_metrics": self._metrics_results,
+        "predictions": self._predictions
         }
