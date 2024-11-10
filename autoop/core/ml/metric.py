@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+from typing import Any
 import numpy as np
 
 METRICS = [
@@ -46,7 +46,7 @@ def get_metric(name: str) -> "Metric":
 
 def count_metrics_per_class(
     observations: np.ndarray, ground_truth: np.ndarray, cls: int
-):
+) -> Any:
     """
     Count metrics for a specific class.
 
@@ -78,7 +78,7 @@ def get_unique_classes(ground_truth: np.ndarray) -> np.ndarray:
     return np.unique(ground_truth)
 
 
-def difference(observation: np.ndarray,ground_truth: np.ndarray) -> np.ndarray:
+def difference(observation: np.ndarray, ground_t: np.ndarray) -> np.ndarray:
     """
     Calculate the difference between observations and ground truth.
 
@@ -89,7 +89,7 @@ def difference(observation: np.ndarray,ground_truth: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: The difference between observations and ground truth.
     """
-    return ground_truth - observation
+    return ground_t - observation
 
 
 class Metric(ABC):

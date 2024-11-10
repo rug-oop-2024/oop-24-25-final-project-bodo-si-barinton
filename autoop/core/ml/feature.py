@@ -13,7 +13,7 @@ class Feature(BaseModel):
     type: Literal["categorical", "numerical"] = Field(...)
     _data: Optional[Any] = PrivateAttr(None)
 
-    def set_data(self, data) -> None:
+    def set_data(self, data : Any) -> None:
         """
         Sets the data for the features.
 
