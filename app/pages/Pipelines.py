@@ -116,7 +116,7 @@ def load_and_show_pipeline_summary_and_predict() -> None:
     saved_pipelines: List[Artifact] = (
         automl_system.registry.list(type="pipeline")
     )
-    
+
     if not saved_pipelines:
         st.write("No saved pipelines available.")
         return
@@ -145,10 +145,12 @@ def load_and_show_pipeline_summary_and_predict() -> None:
             st.write(f"Type: {selected_pipeline.type}")
             st.write(f"Asset Path: {selected_pipeline.asset_path}")
             st.write(
-                f"Tags: {', '.join(selected_pipeline.tags) if selected_pipeline.tags else 'None'}"
+                f"Tags: "
+                f"{', '.join(selected_pipeline.tags) if selected_pipeline.tags else 'None'}"
             )
             st.write(
-                f"Metadata: {selected_pipeline.metadata if selected_pipeline.metadata else 'None'}"
+                f"Metadata: "
+                f"{selected_pipeline.metadata if selected_pipeline.metadata else 'None'}"
             )
 
             st.write("### Configuration Data:")
@@ -158,16 +160,21 @@ def load_and_show_pipeline_summary_and_predict() -> None:
             task_type: str = pipeline_data["task_type"]
             split_ratio: float = pipeline_data["split"]
             metric_names: List[str] = pipeline_data["metrics"]
-            metrics: List[Metric] = convert_metric_names_to_objects(metric_names)
+            metrics: List[Metric] = convert_metric_names_to_objects(
+                metric_names
+            )
 
             model: Optional[Model] = load_model(task_type, model_name)
 
             if model:
                 uploaded_file = st.file_uploader(
-                    "Upload a CSV file for prediction", type="csv"
+                    "Upload a CSV file for prediction",
+                    type="csv"
                 )
                 dataset_name: str = st.text_input("Dataset Name")
-                asset_path: str = st.text_input("Asset Path (relative to storage)")
+                asset_path: str = st.text_input(
+                    "Asset Path (relative to storage)"
+                )
 
                 if uploaded_file is not None:
                     input_data: pd.DataFrame = pd.read_csv(uploaded_file)

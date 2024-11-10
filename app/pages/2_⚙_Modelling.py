@@ -226,8 +226,8 @@ def feature_selection() -> None:
                     "Enter a version for the pipeline", key="pipeline_version"
                 )
 
-                if st.session_state.pipeline and \
-                    st.button("Save Pipeline Artifacts"):
+                if (st.session_state.pipeline and
+                    st.button("Save Pipeline Artifacts")):
                     for (
                         artifact_key,
                         artifact_data,
