@@ -252,19 +252,20 @@ class LogLossMetric(Metric):
         else:
             log_loss_sum = 0.0
             classes = get_unique_classes(ground_truth)
-            
+
             for cls in classes:
                 ground_truth_binary = (ground_truth == cls).astype(float)
-                
+
                 if cls < observations.shape[1]:
                     observation_prob = observations[:, cls]
                     log_loss_sum += -np.sum(
-                        ground_truth_binary * np.log(observation_prob) +
-                        (1 - ground_truth_binary) * 
+                        ground_truth_binary *
+                        np.log(observation_prob) +
+                        (1 - ground_truth_binary) *
                         np.log(1 - observation_prob)
                     )
                 else:
-                    raise ValueError("Class index exceeds no of columns in observations.")
+                    raise ValueError("Class index > no of columns in obs.")
 
             log_loss = log_loss_sum / len(ground_truth)
 
