@@ -28,7 +28,7 @@ class Artifact(BaseModel, ABC):
         tags: Optional[List[str]] = None,
         metadata: Optional[Dict[Any, Any]] = None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Initialize an Artifact instance.
 
@@ -136,7 +136,7 @@ class Artifact(BaseModel, ABC):
         """
         encoded_path = base64.b64encode(
             self._asset_path.encode()
-            ).decode().rstrip("=")
+        ).decode().rstrip("=")
         return f"{encoded_path}_{self._version}"
 
     @property
