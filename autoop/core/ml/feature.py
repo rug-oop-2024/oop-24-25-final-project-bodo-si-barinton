@@ -13,7 +13,7 @@ class Feature(BaseModel):
     type: Literal["categorical", "numerical"] = Field(...)
     _data: Optional[Union[np.ndarray, list]] = PrivateAttr(None)
 
-    def set_data(self, data : Union[np.ndarray, list]) -> None:
+    def set_data(self, data: Union[np.ndarray, list]) -> None:
         """
         Sets the data for the features.
 

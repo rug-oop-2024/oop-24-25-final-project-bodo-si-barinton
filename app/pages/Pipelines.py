@@ -144,14 +144,18 @@ def load_and_show_pipeline_summary_and_predict() -> None:
             st.write(f"Version: {selected_pipeline.version}")
             st.write(f"Type: {selected_pipeline.type}")
             st.write(f"Asset Path: {selected_pipeline.asset_path}")
-            st.write(
-                f"Tags: "
-                f"{', '.join(selected_pipeline.tags) if selected_pipeline.tags else 'None'}"
+            tags_string = (
+                ', '.join(selected_pipeline.tags) 
+                if selected_pipeline.tags 
+                else 'None'
             )
-            st.write(
-                f"Metadata: "
-                f"{selected_pipeline.metadata if selected_pipeline.metadata else 'None'}"
+            st.write(f"Tags: {tags_string}")
+            metadata_string = (
+                selected_pipeline.metadata 
+                if selected_pipeline.metadata 
+                else 'None'
             )
+            st.write(f"Metadata: {metadata_string}")
 
             st.write("### Configuration Data:")
             st.write(pipeline_data)
@@ -186,7 +190,9 @@ def load_and_show_pipeline_summary_and_predict() -> None:
                         version="2.0.0",
                     )
                     features: List[Feature] = detect_feature_types(dataset1)
-                    feature_names: List[str] = [feature.name for feature in features]
+                    feature_names: List[str] = [
+                        feature.name for feature in features
+                    ]
                     feature_types: Dict[str, str] = {  # noqa: F841
                         feature.name: feature.type for feature in features
                     }
@@ -226,7 +232,8 @@ def load_and_show_pipeline_summary_and_predict() -> None:
 
             else:
                 st.error(
-                    f"Model '{model_name}' for task '{task_type}' could not be loaded."
+                    f"Model '{model_name}' for task '{task_type}'"
+                    f"could not be loaded."
                 )
 
         except Exception as e:

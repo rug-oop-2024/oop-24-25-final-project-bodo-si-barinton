@@ -162,8 +162,10 @@ class DecisionTreeRegressor(Model):
         """
         node = Node()
 
-        if depth >= self._max_depth or \
-            len(ground_truth) < self._min_samples_split:
+        if (
+            depth >= self._max_depth
+            or len(ground_truth) < self._min_samples_split
+        ):
             node.is_leaf = True
             node.prediction = np.mean(ground_truth)
             return node
