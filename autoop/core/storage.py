@@ -9,7 +9,7 @@ class NotFoundError(Exception):
     Exception raised when a path is not found.
     """
 
-    def __init__(self, path) -> None:
+    def __init__(self, path :str) -> None:
         """
         Initialize the NotFoundError instance.
 
@@ -25,7 +25,7 @@ class Storage(ABC):
     """
 
     @abstractmethod
-    def save(self, data: bytes, path: str):
+    def save(self, data: bytes, path: str) -> None:
         """
         Save data to a given path
         Args:
@@ -46,7 +46,7 @@ class Storage(ABC):
         pass
 
     @abstractmethod
-    def delete(self, path: str):
+    def delete(self, path: str) -> None:
         """
         Delete data at a given path
         Args:
