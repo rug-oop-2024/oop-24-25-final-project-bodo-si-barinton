@@ -23,7 +23,7 @@ class Pipeline:
         model: Model,
         input_features: List[Feature],
         target_feature: Feature,
-        split : float=0.8,
+        split: float= 0.8,
     ) -> None:
         """
         Initialize a Pipeline instance.
@@ -48,10 +48,11 @@ class Pipeline:
             and model.type != "classification"
         ):
             raise ValueError(
-                "Model type must be classification for categorical target feature"
+                "Model type must be classification for categorical feature"
             )
-        if target_feature.type == "continuous" and \
-            model.type != "regression":
+        if (target_feature.type == "continuous"
+            and model.type != "regression"
+        ):
             raise ValueError(
                 "Model type must be regression for continuous target feature"
             )
@@ -115,7 +116,7 @@ Pipeline(
         )
         return artifacts
 
-    def _register_artifact(self, name: str, artifact) -> None:
+    def _register_artifact(self, name: str, artifact: Artifact) -> None:
         """
         Register an artifact in the pipeline.
 
