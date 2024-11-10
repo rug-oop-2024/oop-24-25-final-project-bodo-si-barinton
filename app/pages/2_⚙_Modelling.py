@@ -220,13 +220,14 @@ def feature_selection() -> None:
                     st.write("Results:", results)
 
                 pipeline_name: str = st.text_input(
-                    "Enter a name for the pipeline artifact", key="pipeline_name"
+                    "Enter a name for the pipeline", key="pipeline_name"
                 )
                 pipeline_version: str = st.text_input(
-                    "Enter a version for the pipeline artifact", key="pipeline_version"
+                    "Enter a version for the pipeline", key="pipeline_version"
                 )
 
-                if st.session_state.pipeline and st.button("Save Pipeline Artifacts"):
+                if st.session_state.pipeline and \
+                    st.button("Save Pipeline Artifacts"):
                     for (
                         artifact_key,
                         artifact_data,

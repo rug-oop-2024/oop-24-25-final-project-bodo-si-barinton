@@ -94,8 +94,14 @@ def view_saved_pipelines() -> None:
         st.write(f"  - Version: {pipeline.version}")
         st.write(f"  - Asset Path: {pipeline.asset_path}")
         st.write(f"  - Type: {pipeline.type}")
-        st.write(f"  - Tags: {', '.join(pipeline.tags) if pipeline.tags else 'None'}")
-        st.write(f"  - Metadata: {pipeline.metadata if pipeline.metadata else 'None'}")
+        st.write(
+            f"  - Tags: "
+            f"{', '.join(pipeline.tags) if pipeline.tags else 'None'}"
+        )
+        st.write(
+            f"  - Metadata: "
+            f"{pipeline.metadata if pipeline.metadata else 'None'}"
+        )
         st.write("")
 
 
@@ -103,10 +109,14 @@ def load_and_show_pipeline_summary_and_predict() -> None:
     """
     Load a selected pipeline, display its summary.
     """
-    st.title("🔄 Load Pipeline Summary and Predict")
+    st.title(
+        "🔄 Load Pipeline Summary and Predict"
+    )
 
-    saved_pipelines: List[Artifact] = automl_system.registry.list(type="pipeline")
-
+    saved_pipelines: List[Artifact] = (
+        automl_system.registry.list(type="pipeline")
+    )
+    
     if not saved_pipelines:
         st.write("No saved pipelines available.")
         return
