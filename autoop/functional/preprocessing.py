@@ -1,11 +1,15 @@
 from typing import List, Tuple
-from autoop.core.ml.feature import Feature
-from autoop.core.ml.dataset import Dataset
-import pandas as pd
+
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-def preprocess_features(features: List[Feature], dataset: Dataset) -> List[Tuple[str, np.ndarray, dict]]:
+from autoop.core.ml.dataset import Dataset
+from autoop.core.ml.feature import Feature
+
+
+def preprocess_features(
+    features: List[Feature], dataset: Dataset
+) -> List[Tuple[str, np.ndarray, dict]]:
     """Preprocess features.
     Args:
         features (List[Feature]): List of features.
@@ -18,7 +22,9 @@ def preprocess_features(features: List[Feature], dataset: Dataset) -> List[Tuple
     for feature in features:
         if feature.type == "categorical":
             encoder = OneHotEncoder()
-            data = encoder.fit_transform(raw[feature.name].values.reshape(-1, 1)).toarray()
+            data = encoder.fit_transform(
+                raw[feature.name].values.reshape(-1, 1)
+            ).toarray()
             aritfact = {"type": "OneHotEncoder", "encoder": encoder.get_params()}
             results.append((feature.name, data, aritfact))
         if feature.type == "numerical":

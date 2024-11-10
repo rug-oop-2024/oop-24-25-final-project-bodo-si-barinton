@@ -1,8 +1,10 @@
-
 from typing import List
+
+import pandas as pd
+
 from autoop.core.ml.dataset import Dataset
 from autoop.core.ml.feature import Feature
-import pandas as pd
+
 
 def detect_feature_types(dataset: Dataset) -> List[Feature]:
     """Assumption: only categorical and numerical features and no NaN values.
@@ -12,7 +14,7 @@ def detect_feature_types(dataset: Dataset) -> List[Feature]:
         List[Feature]: List of features with their types.
     """
     df = dataset.read()
-    features : List[Feature] = []
+    features: List[Feature] = []
 
     if df.empty:
         raise ValueError("The provided dataset is empty.")
@@ -26,5 +28,5 @@ def detect_feature_types(dataset: Dataset) -> List[Feature]:
         feature = Feature(name=column, type=feature_type)
         feature.set_data(df[column].values)
         features.append(feature)
-    
+
     return features
