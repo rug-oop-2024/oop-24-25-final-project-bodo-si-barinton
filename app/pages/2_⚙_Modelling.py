@@ -11,15 +11,21 @@ from autoop.core.ml.dataset import Dataset
 from autoop.core.ml.feature import Feature
 from autoop.core.ml.metric import Metric, get_metric
 from autoop.core.ml.model import Model
-from autoop.core.ml.model.classification import (
-    SVM,
-    BayesClassification,
-    LogisticClassification,
+from autoop.core.ml.model.classification.svm import SVM
+from autoop.core.ml.model.classification.bayes import (
+    BayesClassification
 )
-from autoop.core.ml.model.regression import (
-    DecisionTreeRegressor,
-    LassoRegression,
-    MultipleLinearRegression,
+from autoop.core.ml.model.classification.logistic_regression import (
+    LogisticClassification
+)
+from autoop.core.ml.model.regression.decisiontreeregression import (
+    DecisionTreeRegressor
+)
+from autoop.core.ml.model.regression.lasso import (
+    LassoRegression
+)
+from autoop.core.ml.model.regression.linearregression import (
+    MultipleLinearRegression
 )
 from autoop.core.ml.pipeline import Pipeline
 from autoop.functional.feature import detect_feature_types
