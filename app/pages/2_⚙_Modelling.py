@@ -67,7 +67,7 @@ def get_compatible_metrics(task_type: str) -> List[str]:
 st.set_page_config(page_title="Modeling", page_icon="📈")
 st.title("⚙ Modeling")
 st.write(
-    "In this section, you can design a machine learning pipeline to train a model "
+    "In this section, you can design a ml pipeline to train a model "
     "on a dataset."
 )
 
@@ -153,8 +153,12 @@ def feature_selection() -> None:
                 selected_model_name: str = st.selectbox(
                     "Select a model", list(available_models.keys())
                 )
-                selected_model_class: Model = available_models[selected_model_name]
-                compatible_metrics: List[str] = get_compatible_metrics(task_type)
+                selected_model_class: Model = available_models[
+                    selected_model_name
+                ]
+                compatible_metrics: List[str] = get_compatible_metrics(
+                    task_type
+                )
                 selected_metrics: List[str] = st.multiselect(
                     "Select metrics", compatible_metrics
                 )
@@ -181,7 +185,8 @@ def feature_selection() -> None:
                             for feature in input_features
                         ],
                         target_feature=Feature(
-                            name=target_feature, type=feature_types[target_feature]
+                            name=target_feature,
+                            type=feature_types[target_feature]
                         ),
                         metrics=metric_objects,
                         split=split_ratio,
@@ -203,7 +208,10 @@ def feature_selection() -> None:
                     st.write("### Pipeline Summary")
                     st.write(f"- *Model*: {selected_model_name}")
                     st.write(f"- *Task Type*: {task_type}")
-                    st.write(f"- *Selected Metrics*: {', '.join(selected_metrics)}")
+                    st.write(
+                        f"- *Selected Metrics*: "
+                        f"{', '.join(selected_metrics)}"
+                    )
                     st.write(f"- *Split Ratio*: {split_ratio}")
                     st.write(f"- *Input Features*: {input_features}")
                     st.write(f"- *Target Feature*: {target_feature}")

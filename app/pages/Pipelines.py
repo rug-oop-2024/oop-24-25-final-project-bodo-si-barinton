@@ -120,7 +120,8 @@ def load_and_show_pipeline_summary_and_predict() -> None:
     )
 
     if selected_pipeline_name:
-        selected_pipeline: Artifact = pipeline_options[selected_pipeline_name
+        selected_pipeline: Artifact = pipeline_options[
+            selected_pipeline_name
         ]
 
         try:

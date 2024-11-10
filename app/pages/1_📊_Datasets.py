@@ -49,7 +49,7 @@ def view_dataset() -> None:
     View details and content of a selected dataset.
     """
     dataset_list: List[str] = [
-        artifact.name 
+        artifact.name
         for artifact in automl_system.registry.list(type="dataset")
     ]
 
@@ -87,7 +87,7 @@ def delete_dataset() -> None:
     Delete a selected dataset from the registry.
     """
     dataset_list: List[str] = [
-        artifact.name 
+        artifact.name
         for artifact in automl_system.registry.list(type="dataset")
     ]
 
