@@ -1,0 +1,1 @@
+We encapsulated all attributes in order to asure permanent correct functionality. 
