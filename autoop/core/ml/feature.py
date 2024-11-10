@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional
+from typing import Literal, Optional, Union
 
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr
@@ -11,9 +11,9 @@ class Feature(BaseModel):
 
     name: str = Field(...)
     type: Literal["categorical", "numerical"] = Field(...)
-    _data: Optional[Any] = PrivateAttr(None)
+    _data: Optional[Union[np.ndarray, list]] = PrivateAttr(None)
 
-    def set_data(self, data : Any) -> None:
+    def set_data(self, data : Union[np.ndarray, list]) -> None:
         """
         Sets the data for the features.
 

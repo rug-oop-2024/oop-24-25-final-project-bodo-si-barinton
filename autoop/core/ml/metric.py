@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any
+
 import numpy as np
 
 METRICS = [
@@ -249,8 +250,8 @@ class LogLossMetric(Metric):
             ground_truth_binary = (ground_truth == cls).astype(float)
             observation_prob = observations[:, cls]
             log_loss_sum += -np.sum(
-                ground_truth_binary * np.log(observation_prob)
-                + (1 - ground_truth_binary) * np.log(1 - observation_prob)
+                ground_truth_binary * np.log(observation_prob) +
+                (1 - ground_truth_binary) * np.log(1 - observation_prob)
             )
 
         return log_loss_sum / len(ground_truth)
@@ -279,7 +280,8 @@ class MicroAverageMetric(Metric):
 
         for cls in classes:
             tp, fp, fn, _ = count_metrics_per_class(
-            observations, ground_truth, cls)
+                observations, ground_truth, cls
+            )
             TP += tp
             FP += fp
             FN += fn
@@ -315,7 +317,8 @@ class MacroAverageMetric(Metric):
 
         for cls in classes:
             TP, FP, FN, _ = count_metrics_per_class(
-            observations, ground_truth, cls)
+                observations, ground_truth, cls
+            )
 
             precision = TP / (TP + FP) if (TP + FP) != 0 else 0
             recall = TP / (TP + FN) if (TP + FN) != 0 else 0

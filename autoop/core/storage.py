@@ -9,7 +9,7 @@ class NotFoundError(Exception):
     Exception raised when a path is not found.
     """
 
-    def __init__(self, path :str) -> None:
+    def __init__(self, path: str) -> None:
         """
         Initialize the NotFoundError instance.
 
@@ -135,7 +135,10 @@ class LocalStorage(Storage):
         self._assert_path_exists(path)
         # Use os.path.join for compatibility across platforms
         keys = glob(os.path.join(path, "**", "*"), recursive=True)
-        return [os.path.relpath(p, self._base_path) for p in keys if os.path.isfile(p)]
+        return [
+            os.path.relpath(p, self._base_path)
+            for p in keys if os.path.isfile(p)
+        ]
 
     def _assert_path_exists(self, path: str) -> None:
         """
