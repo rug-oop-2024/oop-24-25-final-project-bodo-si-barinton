@@ -36,7 +36,8 @@ def preprocess_features(
                 raw[feature.name].values.reshape(-1, 1)
             )
             artifact = {
-                "type": "StandardScaler","scaler": scaler.get_params()
+                "type": "StandardScaler",
+                "scaler": scaler.get_params()
             }
             results.append((feature.name, data, artifact))
     # Sort for consistency
