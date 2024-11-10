@@ -31,13 +31,16 @@ def upload_dataset() -> None:
         encoded_data: bytes = df.to_csv(index=False).encode()
 
         dataset_artifact: Dataset = Dataset(
-            name=dataset_name, asset_path=asset_path, version="1.0.0", data=encoded_data
+            name=dataset_name,
+            asset_path=asset_path,
+            version="1.0.0",
+            data=encoded_data
         )
 
         automl_system.registry.register(dataset_artifact)
 
         st.success(
-            f"Dataset '{dataset_name}' uploaded and saved successfully as an artifact."
+            f"Dataset '{dataset_name}' uploaded and saved successfully."
         )
 
 
@@ -46,14 +49,17 @@ def view_dataset() -> None:
     View details and content of a selected dataset.
     """
     dataset_list: List[str] = [
-        artifact.name for artifact in automl_system.registry.list(type="dataset")
+        artifact.name 
+        for artifact in automl_system.registry.list(type="dataset")
     ]
 
     if not dataset_list:
         st.write("No datasets available.")
         return
 
-    selected_dataset: str = st.selectbox("Select a dataset to view", dataset_list)
+    selected_dataset: str = st.selectbox(
+        "Select a dataset to view", dataset_list
+    )
 
     if selected_dataset:
         dataset_artifact: Optional[Dataset] = next(
@@ -81,14 +87,17 @@ def delete_dataset() -> None:
     Delete a selected dataset from the registry.
     """
     dataset_list: List[str] = [
-        artifact.name for artifact in automl_system.registry.list(type="dataset")
+        artifact.name 
+        for artifact in automl_system.registry.list(type="dataset")
     ]
 
     if not dataset_list:
         st.write("No datasets available.")
         return
 
-    selected_dataset: str = st.selectbox("Select a dataset to delete", dataset_list)
+    selected_dataset: str = st.selectbox(
+        "Select a dataset to delete", dataset_list
+    )
 
     if st.button("Delete Dataset"):
         dataset_artifact: Optional[Dataset] = next(

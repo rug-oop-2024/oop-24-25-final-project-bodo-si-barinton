@@ -11,8 +11,16 @@ from autoop.core.ml.dataset import Dataset
 from autoop.core.ml.feature import Feature
 from autoop.core.ml.metric import Metric, get_metric
 from autoop.core.ml.model import Model
-from autoop.core.ml.model.classification import SVM,BayesClassification,LogisticClassification
-from autoop.core.ml.model.regression import DecisionTreeRegressor, LassoRegression, MultipleLinearRegression
+from autoop.core.ml.model.classification import (
+    SVM,
+    BayesClassification,
+    LogisticClassification,
+)
+from autoop.core.ml.model.regression import (
+    DecisionTreeRegressor,
+    LassoRegression,
+    MultipleLinearRegression,
+)
 from autoop.core.ml.pipeline import Pipeline
 from autoop.functional.feature import detect_feature_types
 
@@ -48,7 +56,11 @@ def get_compatible_metrics(task_type: str) -> List[str]:
     if task_type == "Classification":
         return ["accuracy", "logloss", "micro", "macro"]
     elif task_type == "Regression":
-        return ["mean_squared_error", "mean_absolute_error", "root_mean_squared_error"]
+        return [
+            "mean_squared_error",
+            "mean_absolute_error",
+            "root_mean_squared_error"
+        ]
     return []
 
 
@@ -85,7 +97,8 @@ def feature_selection() -> None:
     Perform feature selection for a selected dataset.
     """
     dataset_list: List[str] = [
-        artifact.name for artifact in automl_system.registry.list(type="dataset")
+        artifact.name
+        for artifact in automl_system.registry.list(type="dataset")
     ]
     if not dataset_list:
         st.write("No datasets available.")
@@ -111,7 +124,9 @@ def feature_selection() -> None:
             st.write(df.head())
 
             dataset_instance: Dataset = Dataset.from_dataframe(
-                df, name=selected_dataset, asset_path=dataset_artifact.asset_path
+                df,
+                name=selected_dataset,
+                asset_path=dataset_artifact.asset_path
             )
             features: List[Feature] = detect_feature_types(dataset_instance)
             feature_names: List[str] = [feature.name for feature in features]
@@ -122,7 +137,9 @@ def feature_selection() -> None:
             input_features: List[str] = st.multiselect(
                 "Select input features", feature_names
             )
-            target_feature: str = st.selectbox("Select target feature", feature_names)
+            target_feature: str = st.selectbox(
+                "Select target feature", feature_names
+            )
 
             if input_features and target_feature:
                 task_type: str = (
@@ -130,7 +147,9 @@ def feature_selection() -> None:
                     if feature_types[target_feature] == "numerical"
                     else "Classification"
                 )
-                available_models: Dict[str, Model] = MODEL_CLASSES[task_type]
+                available_models: Dict[str, Model] = MODEL_CLASSES[
+                    task_type
+                ]
                 selected_model_name: str = st.selectbox(
                     "Select a model", list(available_models.keys())
                 )
@@ -155,7 +174,10 @@ def feature_selection() -> None:
                         dataset=dataset_instance,
                         model=selected_model_class,
                         input_features=[
-                            Feature(name=feature, type=feature_types[feature])
+                            Feature(
+                                name=feature,
+                                type=feature_types[feature]
+                            )
                             for feature in input_features
                         ],
                         target_feature=Feature(

@@ -70,7 +70,8 @@ def convert_metric_names_to_objects(metric_names: List[str]) -> List[Metric]:
 
 
 action: str = st.sidebar.selectbox(
-    "Choose an action", ["View Saved Pipelines", "Load Pipeline Summary and Predict"]
+    "Choose an action", ["View Saved Pipelines",
+                         "Load Pipeline Summary and Predict"]
 )
 
 
@@ -79,7 +80,9 @@ def view_saved_pipelines() -> None:
     Display all saved pipelines and their details in the Streamlit interface.
     """
     st.title("📋 Existing Saved Pipelines")
-    saved_pipelines: List[Artifact] = automl_system.registry.list(type="pipeline")
+    saved_pipelines: List[Artifact] = automl_system.registry.list(
+        type="pipeline"
+    )
 
     if not saved_pipelines:
         st.write("No saved pipelines found.")
@@ -98,7 +101,7 @@ def view_saved_pipelines() -> None:
 
 def load_and_show_pipeline_summary_and_predict() -> None:
     """
-    Load a selected pipeline, display its summary, and allow predictions with new data.
+    Load a selected pipeline, display its summary.
     """
     st.title("🔄 Load Pipeline Summary and Predict")
 
@@ -117,10 +120,13 @@ def load_and_show_pipeline_summary_and_predict() -> None:
     )
 
     if selected_pipeline_name:
-        selected_pipeline: Artifact = pipeline_options[selected_pipeline_name]
+        selected_pipeline: Artifact = pipeline_options[selected_pipeline_name
+        ]
 
         try:
-            pipeline_data: Dict[str, Any] = pickle.loads(selected_pipeline.data)
+            pipeline_data: Dict[str, Any] = pickle.loads(
+                selected_pipeline.data
+            )
 
             st.write("## Pipeline Summary")
             st.write(f"Name: {selected_pipeline.name}")
