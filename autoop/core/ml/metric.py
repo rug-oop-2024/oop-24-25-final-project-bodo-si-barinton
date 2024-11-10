@@ -260,10 +260,11 @@ class LogLossMetric(Metric):
                     observation_prob = observations[:, cls]
                     log_loss_sum += -np.sum(
                         ground_truth_binary * np.log(observation_prob) +
-                        (1 - ground_truth_binary) * np.log(1 - observation_prob)
+                        (1 - ground_truth_binary) * 
+                        np.log(1 - observation_prob)
                     )
                 else:
-                    raise ValueError("Class index exceeds number of columns in observations array.")
+                    raise ValueError("Class index exceeds no of columns in observations.")
 
             log_loss = log_loss_sum / len(ground_truth)
 
